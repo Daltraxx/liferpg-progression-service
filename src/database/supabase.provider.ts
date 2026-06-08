@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './database.types';
 
@@ -17,25 +18,12 @@ export class SupabaseProvider {
    * Initializes the Supabase provider with environment variables.
    * @throws {Error} If SUPABASE_URL or SUPABASE_KEY environment variables are not set.
    */
-  constructor() {
-    const supabaseUrl = this.getEnv('SUPABASE_URL');
-    const supabaseKey = this.getEnv('SUPABASE_KEY');
+  constructor(private readonly configService: ConfigService) {
+    const supabaseUrl = this.configService.getOrThrow<string>('SUPABASE_URL');
+    const supabaseKey = this.configService.getOrThrow<string>('SUPABASE_KEY');
     this.supabaseClient = createClient<Database>(supabaseUrl, supabaseKey);
   }
 
-  /**
-   * Retrieves an environment variable value.
-   * @param name - The name of the environment variable.
-   * @returns The value of the environment variable.
-   * @throws {Error} If the environment variable is not set.
-   */
-  private getEnv(name: string): string {
-    const value = process.env[name];
-    if (!value) {
-      throw new Error(`Environment variable ${name} is not set`);
-    }
-    return value;
-  }
 
   /**
    * Returns the Supabase client instance.
