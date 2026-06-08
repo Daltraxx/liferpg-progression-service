@@ -20,7 +20,7 @@ export class SupabaseProvider {
    */
   constructor(private readonly configService: ConfigService) {
     const supabaseUrl = this.configService.getOrThrow<string>('SUPABASE_URL');
-    const supabaseKey = this.configService.getOrThrow<string>('SUPABASE_KEY');
+    const supabaseKey = this.configService.getOrThrow<string>('SUPABASE_SERVICE_ROLE_KEY');
     this.supabaseClient = createClient<Database>(supabaseUrl, supabaseKey);
   }
 
