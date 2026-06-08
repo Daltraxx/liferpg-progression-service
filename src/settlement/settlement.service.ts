@@ -31,6 +31,11 @@ export class SettlementService {
     const timezonesToProcess =
       this.timezoneDetectorService.getTimezonesWithDayJustEnded(2);
     this.logger.debug(`Timezones to process: ${timezonesToProcess.join(', ')}`);
+    
+    if (timezonesToProcess.length === 0) {
+      this.logger.log('No timezones to process. Settlement pipeline completed.');
+      return;
+    }
 
     // Step 2: Gather users with applicable timezones
 
