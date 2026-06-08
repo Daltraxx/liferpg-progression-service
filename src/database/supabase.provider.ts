@@ -4,6 +4,8 @@ import { createClient } from '@supabase/supabase-js';
 import type { Database } from './database.types';
 
 /**
+ * @module SupabaseProvider
+ * @description
  * Provider for Supabase client initialization and management.
  * Handles Supabase configuration and environment variable validation.
  * @remarks 
@@ -14,7 +16,6 @@ import type { Database } from './database.types';
  *   ensuring that only one instance of the Supabase client exists in the application.
  * - The service role key is used, bypassing RLS policies, 
  *   which is necessary for the settlement pipeline to function correctly.
- * @module SupabaseProvider
  */
 @Injectable()
 export class SupabaseProvider {
