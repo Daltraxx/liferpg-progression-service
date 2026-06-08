@@ -1,6 +1,5 @@
 import { Module, Global } from '@nestjs/common';
 import { SupabaseProvider } from './supabase.provider';
-import { ConfigService } from '@nestjs/config';
 
 /**
  * Global Database module that provides database connectivity.
@@ -15,6 +14,4 @@ import { ConfigService } from '@nestjs/config';
   providers: [SupabaseProvider],
   exports: [SupabaseProvider],
 })
-export class DatabaseModule {
-  constructor(private configService: ConfigService) {}
-}
+export class DatabaseModule {}
