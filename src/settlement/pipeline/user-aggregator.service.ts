@@ -16,7 +16,9 @@ export class UserAggregatorService {
    * @returns Promise resolving to an array of aggregated user data
    * @throws Error if fetching settlement users data fails
    */
-  async aggregateUsers(timezones: string[]): Promise<AggregatedUserData[]> {
+  async getAggregatedUserData(
+    timezones: string[],
+  ): Promise<AggregatedUserData[]> {
     const supabase = this.supabaseProvider.client;
     const { data: userData, error } = await supabase.rpc(
       'get_settlement_users_data',

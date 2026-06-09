@@ -1,16 +1,18 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { TimezoneDetectorService } from './pipeline/timezone-detector.service';
+import { UserAggregatorService } from './pipeline/user-aggregator.service';
+import type { AggregatedUserData } from './settlement.types';
 import { Cron, CronExpression } from '@nestjs/schedule';
 
 /**
  * Orchestrates the settlement service pipeline, which includes the following steps:
- * 1. Determine which timezone day just ended to determine which users need to be processed
- * 2. Gather users with applicable timezones
- * 3. For each applicable user, get their...
- *    a. quest_completions for the day (where processed_at is null)
- *    b. quests for for determining updates (strength_points) as well as which quests have not been completed
- *    c. attributes whose experience needs to be updated based on quest completions
- * 4. Aggregate data into a single pre-transaction object
+  * 1. Determine which timezone day just ended to determine which users need to be processed
+  * 2. Gather aggregated user data for those users, including:
+  *    a. Basic user data such as experience and level
+  *    b. All quests for the user, including strength points and other relevant data for settlement calculations
+  *    c. All attributes for the user, including experience and level for settlement calculations
+  *    d. Mapping of quests to attributes with corresponding power for settlement calculations
+ * 4. Transform aggregated data into a single pre-transaction object for each user which includes updates based on quest completions
  * 5. For each user, commit update to the database in a transaction via rpc call with the pre-transaction object as the payload
  *
  * @module SettlementService
@@ -21,6 +23,7 @@ export class SettlementService {
 
   constructor(
     private readonly timezoneDetectorService: TimezoneDetectorService,
+    private readonly userAggregatorService: UserAggregatorService,
   ) {}
 
   @Cron(CronExpression.EVERY_HOUR)
@@ -37,14 +40,17 @@ export class SettlementService {
       return;
     }
 
-    // Step 2: Gather users with applicable timezones
+    // Step 2: Get aggregated user data for users in those timezones
+    const aggregatedUserData: AggregatedUserData[] =
+      await this.userAggregatorService.getAggregatedUserData(timezonesToProcess);
+    
+    this.logger.debug(`Aggregated user data retrieved for ${aggregatedUserData.length} users`);
+    if (aggregatedUserData.length === 0) {
+      this.logger.log('No users to process. Settlement pipeline completed.');
+      return;
+    }
 
-    // Step 3: For each applicable user, get their...
-    //    a. quest_completions for the day (where processed_at is null)
-    //    b. quests for for determining updates (strength_points) as well as which quests have not been completed
-    //    c. attributes whose experience needs to be updated based on quest completions
-
-    // Step 4: Aggregate data into a single pre-transaction object
+    // Step 4: Use aggregated user data to create a single pre-transaction object
 
     // Step 5: For each user, commit update to the database in a transaction via rpc call with the pre-transaction object as the payload
   }
