@@ -494,6 +494,10 @@ export type Database = {
         };
         Returns: Json;
       };
+      get_settlement_users_data: {
+        Args: { p_timezones: string[] };
+        Returns: Json;
+      };
     };
     Enums: {
       strength_rank: 'E' | 'D' | 'C' | 'B' | 'A' | 'S';
