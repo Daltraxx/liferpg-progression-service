@@ -10,7 +10,7 @@ export class TimezoneDetectorService {
   private readonly timezones: string[] = Intl.supportedValuesOf('timeZone');
 
   /**
-   * Detects and returns timezones (in IANA format) whose day's have just ended.
+   * Detects and returns timezones (in IANA format) whose days have just ended.
    * @param endOfDayHour - The hour when end-of-day is determined (defaults to 0 for midnight)
    * @returns Array of timezone identifiers where the day has just ended
    */
