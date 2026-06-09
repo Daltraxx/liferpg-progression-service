@@ -127,10 +127,10 @@ export type QuestCompletionData =
 /**
  * Aggregated settlement input for a single user.
  * @property user - Basic user data such as experience and level
- * @property quests - All quests for the user, including strength points and other relevant data for settlement calculations
- * @property attributes - All attributes for the user, including experience and level for settlement calculations
- * @property quests_attributes - Mapping of quests to attributes with corresponding power for settlement calculations
- * @property quest_completions - Quest completions for the user that have not yet been processed, including experience earned for settlement calculations
+ * @property quests[] - All quests for the user, including strength points and other relevant data for settlement calculations
+ * @property attributes[] - All attributes for the user, including experience and level for settlement calculations
+ * @property quests_attributes[] - Mapping of quests to attributes with corresponding power for settlement calculations
+ * @property quest_completions[] - Quest completions for the user that have not yet been processed, including experience earned for settlement calculations
  */
 export interface AggregatedUserData {
   user: UserData;
