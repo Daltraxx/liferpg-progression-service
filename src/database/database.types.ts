@@ -216,6 +216,7 @@ export type Database = {
           quest_id: number;
           streak: number;
           updated_at: string | null;
+          user_id: string;
         };
         Insert: {
           completed_at?: string;
@@ -225,6 +226,7 @@ export type Database = {
           quest_id: number;
           streak?: number;
           updated_at?: string | null;
+          user_id: string;
         };
         Update: {
           completed_at?: string;
@@ -234,8 +236,23 @@ export type Database = {
           quest_id?: number;
           streak?: number;
           updated_at?: string | null;
+          user_id?: string;
         };
         Relationships: [
+          {
+            foreignKeyName: 'quest_completions_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'user_progress';
+            referencedColumns: ['user_id'];
+          },
+          {
+            foreignKeyName: 'quest_completions_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
           {
             foreignKeyName: 'task_completions_task_id_fkey';
             columns: ['quest_id'];
