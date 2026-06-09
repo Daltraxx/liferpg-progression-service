@@ -136,6 +136,8 @@ Full table can be found on the Supabase dashboard.
   - Unique completion record identifier
 - `quest_id`: INT REFERENCES quests(id) ON DELETE CASCADE NOT NULL
   - Reference to completed quest
+- `user_id`: UUID REFERENCES users(id) ON DELETE CASCADE NOT NULL
+  - User who completed the quest
 - `completed_at`: TIMESTAMPTZ DEFAULT NOW() NOT NULL
   - Completion timestamp
 - `processed_at`: TIMESTAMPTZ
