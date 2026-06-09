@@ -15,8 +15,8 @@ export class TimezoneDetectorService {
    * @returns Array of timezone identifiers where the day has just ended
    */
   getTimezonesWithDayJustEnded(endOfDayHour: number = 0): string[] {
+    const now = new Date();
     return this.timezones.filter((timezone) => {
-      const now = new Date();
       const currentTimeInTimezone = new TZDate(now, timezone);
       return currentTimeInTimezone.getHours() === endOfDayHour;
     });
