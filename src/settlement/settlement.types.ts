@@ -35,6 +35,7 @@ export type QuestProjection<K extends keyof QuestRow> = Pick<QuestRow, K>;
  */
 export type QueriedQuestFields =
   | 'id'
+  | 'name'
   | 'strength_level'
   | 'strength_points'
   | 'last_rest_date'
@@ -64,7 +65,7 @@ export type AttributeProjection<K extends keyof AttributeRow> = Pick<
 /**
  * Attribute columns required by the settlement pipeline.
  */
-export type QueriedAttributeFields = 'id' | 'experience' | 'level';
+export type QueriedAttributeFields = 'id' | 'name' | 'experience' | 'level';
 
 /**
  * Attribute data returned by settlement queries.
