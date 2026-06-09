@@ -57,6 +57,8 @@ Full table can be found on the Supabase dashboard.
 
 - `idx_users_usertag` ON (usertag)
   - Fast lookups by usertag for uniqueness checks
+- `idx_users_timezone` ON (timezone)
+  - Fast lookups by timezone for batch processing
 
 **attributes**: Player-defined attributes that level independently
 
@@ -155,8 +157,8 @@ Full table can be found on the Supabase dashboard.
   - Fast lookups by quest
 - `idx_quest_completions_completed_at` ON (completed_at)
   - Fast lookups by completion date
-- `idx_quest_completions_unprocessed` ON (processed_at) WHERE processed_at IS NULL
-  - Fast lookups by processing date for daily batch job
+- `idx_quest_completions_user_unprocessed` ON (user_id) WHERE processed_at IS NULL
+  - Fast lookups for unprocessed completions by user
 
 **quests_attributes**: Junction table linking quests to attributes with power multipliers
 
