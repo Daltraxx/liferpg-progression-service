@@ -496,6 +496,7 @@ as $$
       select jsonb_agg(
         jsonb_build_object(
           'id', q.id,
+          'name', q.name,
           'strength_level', q.strength_level,
           'strength_points', q.strength_points,
           'last_rest_date', q.last_rest_date,
@@ -513,6 +514,7 @@ as $$
       select jsonb_agg(
         jsonb_build_object(
           'id', a.id,
+          'name', a.name,
           'experience', a.experience,
           'level', a.level
         )
