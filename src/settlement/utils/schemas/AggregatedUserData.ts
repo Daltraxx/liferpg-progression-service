@@ -3,12 +3,13 @@ import { STRENGTH_LEVELS } from '../../../common/constants';
 
 /**
  * Schema for user settlement data.
- * Includes user ID, experience points, and current level.
+ * Includes user ID, experience points, current level, and timezone.
  */
 export const SettlementUserDataSchema = z.object({
   id: z.string(),
   experience: z.number(),
   level: z.number(),
+  timezone: z.string(),
 });
 
 export type SettlementUserData = z.infer<typeof SettlementUserDataSchema>;

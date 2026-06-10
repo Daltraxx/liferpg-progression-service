@@ -13,7 +13,7 @@ export type UserProjection<K extends keyof UserRow> = Pick<UserRow, K>;
 /**
  * User columns required by the settlement pipeline.
  */
-export type QueriedUserFields = 'id' | 'experience' | 'level';
+export type QueriedUserFields = 'id' | 'experience' | 'level' | 'timezone';
 
 /**
  * User data returned by settlement queries.
