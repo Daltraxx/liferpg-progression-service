@@ -482,7 +482,8 @@ as $$
       'user', jsonb_build_object(
         'id', u.id,
         'experience', u.experience,
-        'level', u.level
+        'level', u.level,
+        'timezone', u.timezone
       ),
 
       'quests', coalesce(q.quests, '[]'::jsonb),
