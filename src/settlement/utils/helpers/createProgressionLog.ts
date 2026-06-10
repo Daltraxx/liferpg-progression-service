@@ -8,6 +8,7 @@ import { ProgressionLogEntry } from '../interfaces/processed-data.types';
  * @param questName - The name of the quest
  * @param questStrengthLevel - The strength level of the quest
  * @param points - The experience points gained
+ * @param newTotal - The new total experience points for the user
  * @returns A progression log entry for user experience
  */
 export const createUserProgressionLog = (
@@ -36,6 +37,7 @@ export const createUserProgressionLog = (
  * @param questId - The ID of the quest
  * @param questName - The name of the quest
  * @param points - The strength points gained or lost
+ * @param newTotal - The new total strength points for the quest
  * @param streak - The current streak count
  * @returns A progression log entry for quest strength points
  */
@@ -68,6 +70,7 @@ export const createQuestStrengthProgressionLog = (
  * @param attributeName - The name of the attribute
  * @param attributePower - The power level of the attribute
  * @param points - The points gained for the attribute
+ * @param newTotal - The new total experience points for the attribute
  * @returns A progression log entry for attribute points
  */
 export const createAttributeProgressionLog = (
