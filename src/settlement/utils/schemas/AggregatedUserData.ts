@@ -63,6 +63,7 @@ export const SettlementQuestCompletionDataSchema = z.object({
   quest_id: z.number(),
   experience_earned: z.number(),
   processed_at: z.string().nullable(),
+  completed_at: z.string(),
 });
 export type SettlementQuestCompletionData = z.infer<typeof SettlementQuestCompletionDataSchema>;
 

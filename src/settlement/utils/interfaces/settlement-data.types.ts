@@ -117,7 +117,8 @@ export type QueriedQuestCompletionsFields =
   | 'id'
   | 'quest_id'
   | 'experience_earned'
-  | 'processed_at';
+  | 'processed_at'
+  | 'completed_at';
 
 /**
  * Quest completion data returned by settlement queries.
