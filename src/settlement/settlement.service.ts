@@ -12,10 +12,14 @@ import { Cron, CronExpression } from '@nestjs/schedule';
   *    b. All quests for the user, including strength points and other relevant data for settlement calculations
   *    c. All attributes for the user, including experience and level for settlement calculations
   *    d. Mapping of quests to attributes with corresponding power for settlement calculations
- * 4. Transform aggregated data into a single pre-transaction object for each user which includes updates based on quest completions
- * 5. For each user, commit update to the database in a transaction via rpc call with the pre-transaction object as the payload
+ * 3. Transform aggregated data into a single pre-transaction object for each user which includes updates based on quest completions
+ * 4. For each user, commit update to the database in a transaction via rpc call with the pre-transaction object as the payload
  *
  * @module SettlementService
+ * @remarks
+ * - The settlement pipeline is currently scheduled to run every hour, but this can be adjusted as needed. 
+ *   The end of day for each timezone is currently defined as 2am in that timezone, but this can also be adjusted as needed.
+ * - Consider reducing batch sizes when processing users in the settlement pipeline if necessary 
  */
 @Injectable()
 export class SettlementService {
