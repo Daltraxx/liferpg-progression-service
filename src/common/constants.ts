@@ -10,3 +10,4 @@
   * allowing for type safety when using these values elsewhere in the codebase.
 */
 export const STRENGTH_LEVELS = ['E', 'D', 'C', 'B', 'A', 'S'] as const;
+export type StrengthLevel = typeof STRENGTH_LEVELS[number];
