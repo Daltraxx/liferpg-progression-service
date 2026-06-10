@@ -21,21 +21,29 @@ export class UserAggregatorService {
     timezones: string[],
   ): Promise<AggregatedUserData[]> {
     const supabase = this.supabaseProvider.client;
-    const { data, error } = await supabase.rpc(
-      'get_settlement_users_data',
-      { p_timezones: timezones },
-    );
+    const { data, error } = await supabase.rpc('get_settlement_users_data', {
+      p_timezones: timezones,
+    });
 
     if (error) {
       throw new Error(`Error fetching settlement users data: ${error.message}`);
     }
 
     if (data === null) {
-      throw new Error('null data received from get_settlement_users_data rpc call');
+      throw new Error(
+        'null data received from get_settlement_users_data rpc call',
+      );
     }
 
     const payload = typeof data === 'string' ? JSON.parse(data) : data;
-    const validatedUserData: AggregatedUserData[] = AggregatedUserDataArraySchema.parse(payload);
-    return validatedUserData;
+    try {
+      const validatedUserData: AggregatedUserData[] =
+        AggregatedUserDataArraySchema.parse(payload);
+      return validatedUserData;
+    } catch (error) {
+      throw new Error(`Settlement users data validation failed:`, {
+        cause: error,
+      });
+    }
   }
 }
