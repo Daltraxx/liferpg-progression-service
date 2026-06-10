@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { SupabaseProvider } from '../../database/supabase.provider';
-import type { AggregatedUserData } from '../settlement.types';
+import type { AggregatedUserData } from '../utils/interfaces/settlement-data.types';
 import { AggregatedUserDataArraySchema } from '../utils/schemas/AggregatedUserData';
 
 /**
