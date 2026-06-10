@@ -83,5 +83,4 @@ export interface ProgressionLogEntry {
   attributeName: string | null; // null if progression is not related to a specific attribute
   points: number;
   reason: string; // Details about the progression event
-  timestamp: string; // UTC ISO string
 }
