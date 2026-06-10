@@ -542,7 +542,8 @@ as $$
           'id', qc.id,
           'quest_id', qc.quest_id,
           'experience_earned', qc.experience_earned,
-          'processed_at', qc.processed_at
+          'processed_at', qc.processed_at,
+          'completed_at', qc.completed_at
         )
       ) as quest_completions
       from quest_completions qc
