@@ -11,3 +11,19 @@
 */
 export const STRENGTH_LEVELS = ['E', 'D', 'C', 'B', 'A', 'S'] as const;
 export type StrengthLevel = typeof STRENGTH_LEVELS[number];
+
+/**
+ * Thresholds for each quest strength level, 
+ * defining the minimum strength points required to achieve each level.
+ * These thresholds can be used in the settlement calculations 
+ * to determine when a quest's strength level should be upgraded or downgraded 
+ * based on the user's quest completion.
+ */
+export const STRENGTH_LEVEL_THRESHOLDS: Record<StrengthLevel, number> = {
+  E: 0,
+  D: 100,
+  C: 200,
+  B: 300,
+  A: 400,
+  S: 500,
+};
