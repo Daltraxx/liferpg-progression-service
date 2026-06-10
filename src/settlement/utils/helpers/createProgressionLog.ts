@@ -16,6 +16,7 @@ export const createUserProgressionLog = (
   questName: string,
   questStrengthLevel: StrengthLevel,
   points: number,
+  newTotal: number,
 ): ProgressionLogEntry => {
   return {
     userId,
@@ -25,7 +26,7 @@ export const createUserProgressionLog = (
     attributeId: null,
     attributeName: null,
     points,
-    reason: `User gained ${points} experience for quest ${questName} (quest_id: ${questId}) (strength_level: ${questStrengthLevel}).`,
+    reason: `Delta: ${points}; New Total: ${newTotal}; Quest ${questName} (strength_level: ${questStrengthLevel}).`,
   };
 };
 
@@ -43,9 +44,9 @@ export const createQuestStrengthProgressionLog = (
   questId: number,
   questName: string,
   points: number,
+  newTotal: number,
   streak: number,
 ): ProgressionLogEntry => {
-  const verb = points > 0 ? 'gained' : 'lost';
   return {
     userId,
     target: 'quest_strength',
@@ -54,7 +55,7 @@ export const createQuestStrengthProgressionLog = (
     attributeId: null,
     attributeName: null,
     points,
-    reason: `User ${verb} ${Math.abs(points)} strength points for quest ${questName} (quest_id: ${questId}) (streak: ${streak}).`,
+    reason: `Delta: ${points}; New Total: ${newTotal}; Quest ${questName} (streak: ${streak}).`,
   };
 };
 
@@ -77,6 +78,7 @@ export const createAttributeProgressionLog = (
   attributeName: string,
   attributePower: number,
   points: number,
+  newTotal: number,
 ): ProgressionLogEntry => {
   return {
     userId,
@@ -86,6 +88,6 @@ export const createAttributeProgressionLog = (
     attributeId,
     attributeName,
     points,
-    reason: `User gained ${points} points for attribute ${attributeName} (attribute_id: ${attributeId}) (attribute_power: ${attributePower}).`,
+    reason: `Delta: ${points}; New Total: ${newTotal}; Attribute ${attributeName}; Quest: ${questName} (attribute_power: ${attributePower}).`,
   };
 };
