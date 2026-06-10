@@ -78,9 +78,9 @@ export interface ProgressionLogEntry {
   userId: string;
   target: 'user' | 'quest_strength' | 'attribute';
   questId: number;
-  quest_name: string;
+  questName: string;
   attributeId: number | null; // null if progression is not related to a specific attribute
-  attribute_name: string | null; // null if progression is not related to a specific attribute
+  attributeName: string | null; // null if progression is not related to a specific attribute
   points: number;
   reason: string; // Details about the progression event
   timestamp: string; // UTC ISO string
