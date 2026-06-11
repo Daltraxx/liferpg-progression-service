@@ -1,4 +1,4 @@
-import type { Database } from '../../../database/database.types';
+import type { Database } from '../../database/database.types';
 
 /**
  * Full row shape for the users table.
