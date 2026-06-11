@@ -1,4 +1,4 @@
-import { StrengthLevel } from '../../../common/constants';
+import { StrengthLevel } from '../../common/constants';
 
 /**
  * Calculates the strength point gain for quest completion based on a streak value.
