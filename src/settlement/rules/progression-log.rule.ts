@@ -1,5 +1,5 @@
-import type { StrengthLevel } from '../../../common/constants';
-import { ProgressionLogEntry } from '../../types/processed-data.types';
+import type { StrengthLevel } from '../../common/constants';
+import { ProgressionLogEntry } from '../types/processed-data.types';
 
 /**
  * Creates a progression log entry for user experience gain.
