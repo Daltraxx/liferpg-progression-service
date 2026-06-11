@@ -274,6 +274,7 @@ export type Database = {
           name: string;
           position: number;
           rest_frequency: number;
+          rest_progress: number;
           streak: number;
           strength_level: Database['public']['Enums']['strength_rank'];
           strength_points: number;
@@ -291,6 +292,7 @@ export type Database = {
           name: string;
           position: number;
           rest_frequency?: number;
+          rest_progress?: number;
           streak?: number;
           strength_level?: Database['public']['Enums']['strength_rank'];
           strength_points?: number;
@@ -308,6 +310,7 @@ export type Database = {
           name?: string;
           position?: number;
           rest_frequency?: number;
+          rest_progress?: number;
           streak?: number;
           strength_level?: Database['public']['Enums']['strength_rank'];
           strength_points?: number;
