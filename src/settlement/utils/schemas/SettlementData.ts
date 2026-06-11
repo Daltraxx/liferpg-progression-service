@@ -72,18 +72,18 @@ export type SettlementQuestCompletionData = z.infer<typeof SettlementQuestComple
  * Schema for the aggregated user data object, which includes all relevant data for a user that is needed for settlement calculations. 
  * This schema can be used for validation and type inference throughout the settlement service.
  */
-export const AggregatedUserDataSchema = z.object({
+export const SettlementDataSchema = z.object({
   user: SettlementUserDataSchema,
   quests: z.array(SettlementQuestDataSchema),
   attributes: z.array(SettlementAttributeDataSchema),
   quests_attributes: z.array(SettlementQuestAttributeMappingDataSchema),
   quest_completions: z.array(SettlementQuestCompletionDataSchema),
 });
-export type AggregatedUserData = z.infer<typeof AggregatedUserDataSchema>;
+export type SettlementData = z.infer<typeof SettlementDataSchema>;
 
 /**
- * Schema for an array of AggregatedUserData objects, which is the expected output of the user aggregation step in the settlement pipeline. 
+ * Schema for an array of SettlementData objects, which is the expected output of the user aggregation step in the settlement pipeline. 
  * This schema can be used for validation and type inference throughout the settlement service.
  */
-export const AggregatedUserDataArraySchema = z.array(AggregatedUserDataSchema);
-export type AggregatedUserDataArray = z.infer<typeof AggregatedUserDataArraySchema>;
+export const SettlementDataArraySchema = z.array(SettlementDataSchema);
+export type SettlementDataArray = z.infer<typeof SettlementDataArraySchema>;

@@ -135,7 +135,7 @@ export type QuestCompletionData =
  * @property quests_attributes[] - Mapping of quests to attributes with corresponding power for settlement calculations
  * @property quest_completions[] - Quest completions for the user that have not yet been processed, including experience earned for settlement calculations
  */
-export interface AggregatedUserData {
+export interface SettlementData {
   user: UserData;
   quests: QuestData[];
   attributes: AttributeData[];
