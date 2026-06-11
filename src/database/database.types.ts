@@ -270,7 +270,6 @@ export type Database = {
           frequency: number;
           id: number;
           last_completed_date: string | null;
-          last_rest_date: string | null;
           name: string;
           position: number;
           rest_frequency: number;
@@ -288,7 +287,6 @@ export type Database = {
           frequency?: number;
           id?: number;
           last_completed_date?: string | null;
-          last_rest_date?: string | null;
           name: string;
           position: number;
           rest_frequency?: number;
@@ -306,7 +304,6 @@ export type Database = {
           frequency?: number;
           id?: number;
           last_completed_date?: string | null;
-          last_rest_date?: string | null;
           name?: string;
           position?: number;
           rest_frequency?: number;

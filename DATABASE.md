@@ -107,8 +107,6 @@ Full table can be found on the Supabase dashboard.
   - Allowed rest days without streak reset
 - `rest_progress`: INT NOT NULL DEFAULT 0
   - Represents progress towards next rest day where not completing required quest does not result in penalties
-- `last_rest_date`: DATE
-  - Date of last rest day
 - `experience_share`: INT NOT NULL CHECK (experience_share BETWEEN 0 AND 100)
   - Amount (0–100) of daily experience points allocated to this quest as determined by the user
 - `streak`: INT NOT NULL DEFAULT 0
