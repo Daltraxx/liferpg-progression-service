@@ -14,7 +14,7 @@ export const calculateStrengthPointGain = (streak: number) => {
  * @param strengthLevel - The strength level tier (E, D, C, B, A, S).
  * @returns The number of strength points to lose for the given level.
  */
-export const calculateStrengthPointsLoss = (strengthLevel: StrengthLevel) => {
+export const calculateStrengthPointLoss = (strengthLevel: StrengthLevel) => {
   const lossMapping: Record<StrengthLevel, number> = {
     E: 2,
     D: 5,
