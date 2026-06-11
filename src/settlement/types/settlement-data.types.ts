@@ -38,12 +38,11 @@ export type QueriedQuestFields =
   | 'name'
   | 'strength_level'
   | 'strength_points'
-  | 'last_rest_date'
   | 'frequency'
   | 'rest_frequency'
   | 'rest_progress'
   | 'streak'
-  | 'last_completed_at';
+  | 'last_completed_date';
 
 /**
  * Quest data returned by settlement queries.
