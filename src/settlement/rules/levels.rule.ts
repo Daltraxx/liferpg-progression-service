@@ -28,7 +28,7 @@ export const calculateStrengthLevel = (
 
 /**
  * Calculates the attribute level based on the provided experience points.
- * Uses a cube root formula to determine the level from experience.
+ * Uses an exponential formula to determine the level from experience.
  * @param experience - The number of experience points to evaluate
  * @returns The corresponding attribute level (starts at 1)
  * @example
@@ -39,8 +39,12 @@ export const calculateStrengthLevel = (
 export const calculateAttributeLevel = (experience: number): number => {
   const startingLevel = 1;
   if (experience < ATTRIBUTE_LEVEL_BASE_XP) return startingLevel;
-  const rawLevel = Math.cbrt(experience / ATTRIBUTE_LEVEL_BASE_XP);
-  return Math.floor(rawLevel) + startingLevel;
+  const rawLevel =
+    Math.pow(
+      experience / ATTRIBUTE_LEVEL_BASE_XP,
+      1 / ATTRIBUTE_LEVEL_EXPONENT_STEEPNESS,
+    ) + startingLevel;
+  return Math.floor(rawLevel);
 };
 
 /**
@@ -56,9 +60,9 @@ export const calculateAttributeLevel = (experience: number): number => {
 export const calculateExperienceForLevel = (level: number): number => {
   const startingLevel = 1;
   if (level <= startingLevel) return 0;
-  // Floor the result in case exponent steepness is fractional 
+  // Floor the result in case exponent steepness is fractional
   return Math.floor(
     ATTRIBUTE_LEVEL_BASE_XP *
-    Math.pow(level - startingLevel, ATTRIBUTE_LEVEL_EXPONENT_STEEPNESS)
+      Math.pow(level - startingLevel, ATTRIBUTE_LEVEL_EXPONENT_STEEPNESS),
   );
 };
