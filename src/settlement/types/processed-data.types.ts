@@ -67,12 +67,11 @@ export interface ProcessedAttributeData {
  * @property {string} userId - Unique identifier for the user
  * @property {'user' | 'quest_strength' | 'attribute'} target - Type of progression target
  * @property {number} questId - Associated quest identifier
- * @property {string} quest_name - Name of the associated quest
+ * @property {string} questName - Name of the associated quest
  * @property {number | null} attributeId - Associated attribute identifier or null if not attribute-related
- * @property {string | null} attribute_name - Name of the associated attribute or null if not attribute-related
+ * @property {string | null} attributeName - Name of the associated attribute or null if not attribute-related
  * @property {number} points - Points gained in this progression event
  * @property {string} reason - Details about the progression event
- * @property {string} timestamp - UTC ISO string of when the progression occurred
  */
 export interface ProgressionLogEntry {
   userId: string;
