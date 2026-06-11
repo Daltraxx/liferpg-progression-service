@@ -117,8 +117,8 @@ Full table can be found on the Supabase dashboard.
   - Accumulated strength points
 - `strength_level`: strength_rank REFERENCES strength_levels(level) NOT NULL DEFAULT 'E'
   - Current strength rank (E-S)
-- `last_completed_at`: TIMESTAMPTZ
-  - Date of last completion
+- `last_completed_date`: DATE
+  - Activity date of last completion (the date the completion belongs to, even if completed after midnight but before the user's daily boundary)
 - `position`: INT NOT NULL CHECK (position >= 0)
   - Display order for quest list (unique per user)
   - Position is zero-indexed and handled before insertion
