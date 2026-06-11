@@ -16,5 +16,5 @@ export default function isOverdue(
   const msDiff = current.getTime() - lastCompleted.getTime();
   const msPerDay = 86_400_000;
   const daysElapsed = Math.floor(msDiff / msPerDay);
-  return daysElapsed > frequency;
+  return daysElapsed >= frequency;
 }
