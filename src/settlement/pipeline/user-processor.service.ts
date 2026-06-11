@@ -135,8 +135,18 @@ export class UserProcessorService {
 
         // Award affected attribute experience
         const affectedAttributes = affectedAttributeMap.get(questId);
-        affectedAttributes!.forEach(({ attributeId, attributePower }) => {
-          const affectedAttribute = attributeMap.get(attributeId)!;
+        if (!affectedAttributes || affectedAttributes.length === 0) {
+          throw new Error(
+            `Completed quest ${questId} (${questName}) has no associated attributes`,
+          );
+        }
+        affectedAttributes.forEach(({ attributeId, attributePower }) => {
+          const affectedAttribute = attributeMap.get(attributeId);
+          if (!affectedAttribute) {
+            throw new Error(
+              `Attribute ${attributeId} not found for quest ${questId} (${questName})`,
+            );
+          }
           affectedAttribute.experience += attributePower;
           processedUser.progressionLogs.push(
             createAttributeProgressionLog(
