@@ -105,6 +105,8 @@ Full table can be found on the Supabase dashboard.
   - Interval in days between required completions (1 = daily, 7 = weekly, etc.)
 - `rest_frequency`: INT NOT NULL DEFAULT 0 CHECK (rest_frequency >= 0)
   - Allowed rest days without streak reset
+- `rest_progress`: INT NOT NULL DEFAULT 0
+  - Represents progress towards next rest day where not completing required quest does not result in penalties
 - `last_rest_date`: DATE
   - Date of last rest day
 - `experience_share`: INT NOT NULL CHECK (experience_share BETWEEN 0 AND 100)
