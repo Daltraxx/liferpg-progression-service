@@ -5,13 +5,30 @@
 
 /**
  * Base experience required for the first level of a user, and the exponent for calculating experience requirements for subsequent levels.
+ *
  * The experience required to level up can be calculated using the formula:
- * experienceRequired = USER_LEVEL_BASE_XP * (level ^ USER_LEVEL_EXPONENT_STEEPNESS)
+ * experienceRequired = USER_LEVEL_BASE_XP * ((level - startingLevel) ^ USER_LEVEL_EXPONENT_STEEPNESS),
+ * where startingLevel = 1
+ *
  * To calculate the level for a given amount of experience, you can use the inverse of this formula:
- * level = Math.floor((experience / USER_LEVEL_BASE_XP) ^ (1 / USER_LEVEL_EXPONENT_STEEPNESS))
- */
+ * level = Math.floor((experience / USER_LEVEL_BASE_XP) ^ (1 / USER_LEVEL_EXPONENT_STEEPNESS)) + startingLevel, where startingLevel = 1 */
 export const USER_LEVEL_BASE_XP = 300;
 export const USER_LEVEL_EXPONENT_STEEPNESS = 3;
+
+/**
+ * Base experience required for the first level of an attribute,
+ * and the exponent for calculating experience requirements for subsequent levels.
+ *
+ * The experience required to level up an attribute can be calculated using the formula:
+ * experienceRequired = ATTRIBUTE_LEVEL_BASE_XP * ((level - startingLevel) ^ ATTRIBUTE_LEVEL_EXPONENT_STEEPNESS),
+ * where startingLevel = 1
+ *
+ * To calculate the level for a given amount of experience, you can use the inverse of this formula:
+ * level = Math.floor((experience / ATTRIBUTE_LEVEL_BASE_XP) ^ (1 / ATTRIBUTE_LEVEL_EXPONENT_STEEPNESS)) + startingLevel,
+ * where startingLevel = 1
+ */
+export const ATTRIBUTE_LEVEL_BASE_XP = 10;
+export const ATTRIBUTE_LEVEL_EXPONENT_STEEPNESS = 3;
 
 /*
  * Strength levels for quests, ordered from weakest to strongest.
@@ -37,14 +54,3 @@ export const STRENGTH_LEVEL_THRESHOLDS: Record<StrengthLevel, number> = {
   A: 400,
   S: 500,
 };
-
-/**
- * Base experience required for the first level of an attribute,
- * and the exponent for calculating experience requirements for subsequent levels.
- * The experience required to level up an attribute can be calculated using the formula:
- * experienceRequired = ATTRIBUTE_LEVEL_BASE_XP * (level ^ ATTRIBUTE_LEVEL_EXPONENT_STEEPNESS)
- * To calculate the level for a given amount of experience, you can use the inverse of this formula:
- * level = Math.floor((experience / ATTRIBUTE_LEVEL_BASE_XP) ^ (1 / ATTRIBUTE_LEVEL_EXPONENT_STEEPNESS))
- */
-export const ATTRIBUTE_LEVEL_BASE_XP = 10;
-export const ATTRIBUTE_LEVEL_EXPONENT_STEEPNESS = 3;
