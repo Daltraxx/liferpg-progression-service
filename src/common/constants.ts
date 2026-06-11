@@ -4,6 +4,15 @@
  */
 
 /**
+ * The hour at which the settlement pipeline should consider the previous day to have ended for each user, 
+ * based on their local timezone.
+ * For example, if END_OF_DAY_HOUR is set to 2, 
+ * then the settlement pipeline will consider the previous day to have ended for a user 
+ * when it is 2am in that user's timezone.
+ */
+export const END_OF_DAY_HOUR = 2;
+
+/**
  * Base experience required for the first level of a user, and the exponent for calculating experience requirements for subsequent levels.
  *
  * The experience required to level up can be calculated using the formula:

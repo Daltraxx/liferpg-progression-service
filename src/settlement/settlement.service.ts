@@ -4,6 +4,7 @@ import { UserAggregatorService } from './pipeline/user-aggregator.service';
 import { UserProcessorService } from './pipeline/user-processor.service';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { SettlementDataArray } from './schemas/settlement-data.schema';
+import { END_OF_DAY_HOUR } from '../common/constants';
 
 /**
  * Orchestrates the settlement service pipeline, which includes the following steps:
@@ -39,7 +40,7 @@ export class SettlementService {
 
       // Step 1: Gather timezones whose day has just ended (end of day in this context is currently defined as 2am)
       const timezonesToProcess =
-        this.timezoneDetectorService.getTimezonesWithDayJustEnded(2);
+        this.timezoneDetectorService.getTimezonesWithDayJustEnded(END_OF_DAY_HOUR);
       this.logger.debug(
         `Timezones to process: ${timezonesToProcess.join(', ')}`,
       );
