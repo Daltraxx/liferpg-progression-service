@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { SupabaseProvider } from '../../database/supabase.provider';
-import { SettlementDataArray, SettlementDataArraySchema } from '../utils/schemas/SettlementData';
+import {
+  SettlementDataArray,
+  SettlementDataArraySchema,
+} from '../schemas/settlement-data.schema';
 
 /**
  * Service for aggregating user data from settlements.
@@ -16,9 +19,7 @@ export class UserAggregatorService {
    * @returns Promise resolving to an array of aggregated user data
    * @throws Error if fetching settlement users data fails
    */
-  async getSettlementData(
-    timezones: string[],
-  ): Promise<SettlementDataArray> {
+  async getSettlementData(timezones: string[]): Promise<SettlementDataArray> {
     const supabase = this.supabaseProvider.client;
     const { data, error } = await supabase.rpc('get_settlement_users_data', {
       p_timezones: timezones,

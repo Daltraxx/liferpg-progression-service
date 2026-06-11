@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { TimezoneDetectorService } from './pipeline/timezone-detector.service';
 import { UserAggregatorService } from './pipeline/user-aggregator.service';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { SettlementDataArray } from './utils/schemas/SettlementData';
+import { SettlementDataArray } from './schemas/settlement-data.schema';
 
 /**
  * Orchestrates the settlement service pipeline, which includes the following steps:
@@ -51,9 +51,7 @@ export class SettlementService {
 
       // Step 2: Get aggregated user data for users in those timezones
       const settlementData: SettlementDataArray =
-        await this.userAggregatorService.getSettlementData(
-          timezonesToProcess,
-        );
+        await this.userAggregatorService.getSettlementData(timezonesToProcess);
 
       this.logger.debug(
         `Aggregated user data retrieved for ${settlementData.length} users`,
