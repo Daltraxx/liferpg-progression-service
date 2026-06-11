@@ -3,6 +3,7 @@ import { SettlementService } from './settlement.service';
 import { TimezoneDetectorService } from './pipeline/timezone-detector.service';
 import { UserAggregatorService } from './pipeline/user-aggregator.service';
 import { UserProcessorService } from './pipeline/user-processor.service';
+import { ProgressionCommitService } from './pipeline/progression-commit.service';
 
 @Module({
   providers: [
@@ -10,6 +11,7 @@ import { UserProcessorService } from './pipeline/user-processor.service';
     TimezoneDetectorService,
     UserAggregatorService,
     UserProcessorService,
+    ProgressionCommitService,
   ],
 })
 export class SettlementModule {}
