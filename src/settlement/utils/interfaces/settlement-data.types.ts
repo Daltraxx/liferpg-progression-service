@@ -41,6 +41,7 @@ export type QueriedQuestFields =
   | 'last_rest_date'
   | 'frequency'
   | 'rest_frequency'
+  | 'rest_progress'
   | 'streak'
   | 'last_completed_at';
 

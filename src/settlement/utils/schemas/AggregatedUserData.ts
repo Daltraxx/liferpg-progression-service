@@ -26,6 +26,7 @@ export const SettlementQuestDataSchema = z.object({
   last_rest_date: z.string().nullable(),
   frequency: z.number(),
   rest_frequency: z.number(),
+  rest_progress: z.number(),
   streak: z.number(),
   last_completed_at: z.string().nullable(),
 });
