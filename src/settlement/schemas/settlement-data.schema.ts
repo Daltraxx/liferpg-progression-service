@@ -7,8 +7,8 @@ import { STRENGTH_LEVELS } from '../../common/constants';
  */
 export const SettlementUserDataSchema = z.object({
   id: z.string(),
-  experience: z.number(),
-  level: z.number(),
+  experience: z.number().int().nonnegative(),
+  level: z.number().int().nonnegative(),
   timezone: z.string(),
 });
 
@@ -19,14 +19,14 @@ export type SettlementUserData = z.infer<typeof SettlementUserDataSchema>;
  * Includes quest metadata, strength level, completion tracking, and frequency information.
  */
 export const SettlementQuestDataSchema = z.object({
-  id: z.number(),
+  id: z.number().int().positive(),
   name: z.string(),
   strength_level: z.enum(STRENGTH_LEVELS),
-  strength_points: z.number(),
-  frequency: z.number(),
-  rest_frequency: z.number(),
-  rest_progress: z.number(),
-  streak: z.number(),
+  strength_points: z.number().int().nonnegative(),
+  frequency: z.number().int().nonnegative(),
+  rest_frequency: z.number().int().nonnegative(),
+  rest_progress: z.number().int().nonnegative(),
+  streak: z.number().int().nonnegative(),
   last_completed_date: z.string().nullable(),
 });
 export type SettlementQuestData = z.infer<typeof SettlementQuestDataSchema>;
@@ -36,10 +36,10 @@ export type SettlementQuestData = z.infer<typeof SettlementQuestDataSchema>;
  * Includes attribute ID, name, experience points, and current level.
  */
 export const SettlementAttributeDataSchema = z.object({
-  id: z.number(),
+  id: z.number().int().positive(),
   name: z.string(),
-  experience: z.number(),
-  level: z.number(),
+  experience: z.number().int().nonnegative(),
+  level: z.number().int().nonnegative(),
 });
 export type SettlementAttributeData = z.infer<
   typeof SettlementAttributeDataSchema
@@ -50,9 +50,9 @@ export type SettlementAttributeData = z.infer<
  * Represents the relationship between quests and attributes with associated power values.
  */
 export const SettlementQuestAttributeMappingDataSchema = z.object({
-  quest_id: z.number(),
-  attribute_id: z.number(),
-  attribute_power: z.number(),
+  quest_id: z.number().int().positive(),
+  attribute_id: z.number().int().positive(),
+  attribute_power: z.number().int().min(1).max(3),
 });
 export type SettlementQuestAttributeMappingData = z.infer<
   typeof SettlementQuestAttributeMappingDataSchema
@@ -63,9 +63,9 @@ export type SettlementQuestAttributeMappingData = z.infer<
  * Tracks completed quests, experience earned, and processing timestamps.
  */
 export const SettlementQuestCompletionDataSchema = z.object({
-  id: z.number(),
-  quest_id: z.number(),
-  experience_earned: z.number(),
+  id: z.number().int().positive(),
+  quest_id: z.number().int().positive(),
+  experience_earned: z.number().int().nonnegative(),
   processed_at: z.string().nullable(),
   completed_at: z.string(),
 });
