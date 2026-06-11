@@ -269,7 +269,7 @@ export type Database = {
           experience_share: number;
           frequency: number;
           id: number;
-          last_completed_at: string | null;
+          last_completed_date: string | null;
           last_rest_date: string | null;
           name: string;
           position: number;
@@ -287,7 +287,7 @@ export type Database = {
           experience_share: number;
           frequency?: number;
           id?: number;
-          last_completed_at?: string | null;
+          last_completed_date?: string | null;
           last_rest_date?: string | null;
           name: string;
           position: number;
@@ -305,7 +305,7 @@ export type Database = {
           experience_share?: number;
           frequency?: number;
           id?: number;
-          last_completed_at?: string | null;
+          last_completed_date?: string | null;
           last_rest_date?: string | null;
           name?: string;
           position?: number;
