@@ -1,5 +1,6 @@
 import { TZDate } from '@date-fns/tz';
 import { subDays, format } from 'date-fns';
+import isValidIanaTimezone from './is-valid-timezone';
 
 /**
  * Gets the activity date from a provided timezone. Because settlement runs at the end of the day, 
@@ -8,6 +9,9 @@ import { subDays, format } from 'date-fns';
  * @returns The activity date formatted as 'yyyy-MM-dd'
  */
 export default function getActivityDate(timezone: string): string {
+  if (!isValidIanaTimezone(timezone)) {
+    throw new Error(`Invalid timezone: ${timezone}`);
+  }
   const now = new Date();
   const userTime = new TZDate(now, timezone);
   const activityDate = subDays(userTime, 1);
