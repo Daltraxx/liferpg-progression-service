@@ -23,7 +23,6 @@ export const SettlementQuestDataSchema = z.object({
   name: z.string(),
   strength_level: z.enum(STRENGTH_LEVELS),
   strength_points: z.number(),
-  last_rest_date: z.string().nullable(),
   frequency: z.number(),
   rest_frequency: z.number(),
   rest_progress: z.number(),

@@ -32,7 +32,6 @@ export interface ProcessedUserData {
  * @property {string} name - Quest name
  * @property {string} strengthLevel - Current strength level of the quest
  * @property {number} strengthPoints - Points earned for strength progression
- * @property {string | null} lastRestDate - UTC ISO string of last rest date or null
  * @property {number} restProgress - Progress towards next rest period
  * @property {number} streak - Current completion streak count
  * @property {string | null} lastCompletedDate - Activity date of last completion in user's local timezone (e.g. "2024-06-01") or null if never completed
@@ -42,7 +41,6 @@ export interface ProcessedQuestData {
   name: string;
   strengthLevel: string;
   strengthPoints: number;
-  lastRestDate: string | null; // UTC ISO string or null
   restProgress: number;
   streak: number;
   lastCompletedDate: string | null; // Activity date of last completion in user's local timezone (e.g. "2024-06-01") or null if never completed
