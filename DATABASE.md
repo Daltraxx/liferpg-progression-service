@@ -505,6 +505,7 @@ as $$
           'last_rest_date', q.last_rest_date,
           'frequency', q.frequency,
           'rest_frequency', q.rest_frequency,
+          'rest_progress', q.rest_progress,
           'streak', q.streak,
           'last_completed_at', q.last_completed_at
         )
