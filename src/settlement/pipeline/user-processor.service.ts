@@ -31,6 +31,9 @@ export class UserProcessorService {
     if (settlementData.length === 0) {
       return [];
     }
+
+    // Because all users in the settlementData array have a timezone that just had a day end, 
+    // we can use the first user's timezone to determine the activity date for all users in this batch
     const activityDate = getActivityDate(settlementData[0].user.timezone);
     return settlementData.map((userData) =>
       this.processUser(userData, activityDate),
