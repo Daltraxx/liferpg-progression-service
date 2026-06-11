@@ -79,6 +79,7 @@ export class UserProcessorService {
         strength_level: strengthLevel,
         strength_points: strengthPoints,
         streak,
+        rest_progress: restProgress,
         last_completed_at: lastCompletedAt,
       } = quest;
       const isCompleted = questCompletions.has(quest.id);
@@ -90,6 +91,7 @@ export class UserProcessorService {
          * - Award quest strength points
          * - Update quest's last completed at date from the quest completion record
          * - Update quest's streak
+         * - Increment rest_progress
          * - Leave last rest date unchanged
          * - Log all point awards in the progression log
          */
@@ -142,6 +144,7 @@ export class UserProcessorService {
         );
         const newStrengthLevel = calculateStrengthLevel(newStrengthPoints);
         const newStreak = streak + 1;
+        const newRestProgress = restProgress + 1;
         const processedQuest = {
           questId,
           name: questName,
@@ -149,6 +152,7 @@ export class UserProcessorService {
           strengthPoints: newStrengthPoints,
           lastRestDate: quest.last_rest_date,
           streak: newStreak,
+          restProgress: newRestProgress,
           lastCompletedAt: questCompletion.completed_at,
         };
         processedUser.quests.push(processedQuest);
