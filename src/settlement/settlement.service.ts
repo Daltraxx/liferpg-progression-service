@@ -63,11 +63,11 @@ export class SettlementService {
         return;
       }
 
-      // Step 4: Use settlement data to create a single pre-transaction object for each user
+      // Step 3: Use settlement data to create a single pre-transaction object for each user
       const processedUsers = this.userProcessorService.processUsers(settlementData);
       this.logger.debug(`Processed settlement data for ${processedUsers.length} users`);
 
-      // Step 5: For each user, commit update to the database in a transaction via rpc call with the pre-transaction object as the payload
+      // Step 4: For each user, commit update to the database in a transaction via rpc call with the pre-transaction object as the payload
     } catch (error) {
       this.logger.error('Settlement pipeline error:', error);
       // Depending on the error, we may want to implement retry logic here or alert via an external system,
