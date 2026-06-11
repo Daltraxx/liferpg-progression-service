@@ -2,28 +2,35 @@ import { Injectable } from '@nestjs/common';
 import type {
   SettlementData,
   SettlementDataArray,
-} from '../utils/schemas/SettlementData';
+} from '../schemas/settlement-data.schema';
 import type {
   ProcessedUserData,
   ProcessedAttributeData,
-} from '../utils/interfaces/processed-data.types';
-import getUserActivityDate from '../utils/helpers/getUserActivityDate';
-import { SettlementQuestCompletionData } from '../utils/schemas/SettlementData';
+} from '../types/processed-data.types';
+import { SettlementQuestCompletionData } from '../schemas/settlement-data.schema';
 import {
   createUserProgressionLog,
   createAttributeProgressionLog,
   createQuestStrengthProgressionLog,
-} from '../utils/helpers/createProgressionLog';
-import { calculateStrengthPointGain } from './rules/strength-points.rule';
-import { calculateStrengthLevel } from './rules/levels.rule';
+} from '../rules/progression-log.rule';
+import isOverdue from '../rules/is-overdue.rule';
+import { calculateStrengthPointGain, calculateStrengthPointLoss } from '../rules/strength-points.rule';
+import { calculateStrengthLevel } from '../rules/levels.rule';
+import getActivityDate from '../utils/get-activity-date';
 
 @Injectable()
 export class UserProcessorService {
+  
+
   processUsers(settlementData: SettlementDataArray): ProcessedUserData[] {
-    return settlementData.map((userData) => this.processUser(userData));
+    if (settlementData.length === 0) {
+      return [];
+    }
+    const activityDate = getActivityDate(settlementData[0].user.timezone);
+    return settlementData.map((userData) => this.processUser(userData, activityDate));
   }
 
-  private processUser(userData: SettlementData): ProcessedUserData {
+  private processUser(userData: SettlementData, activityDate: string): ProcessedUserData {
     const processedUser: ProcessedUserData = {
       userId: userData.user.id,
       experience: userData.user.experience,
@@ -33,7 +40,7 @@ export class UserProcessorService {
       progressionLogs: [],
       processedQuestCompletionIds: [],
       processedAt: new Date().toISOString(),
-      activityDate: getUserActivityDate(userData.user.timezone),
+      activityDate: activityDate,
       timezone: userData.user.timezone,
     };
 
@@ -79,9 +86,12 @@ export class UserProcessorService {
         strength_level: strengthLevel,
         strength_points: strengthPoints,
         streak,
+        frequency,
+        rest_frequency: restFrequency,
         rest_progress: restProgress,
-        last_completed_at: lastCompletedAt,
+        last_completed_date: lastCompletedDate,
       } = quest;
+
       const isCompleted = questCompletions.has(quest.id);
       if (isCompleted) {
         /**
@@ -89,7 +99,7 @@ export class UserProcessorService {
          * - Award user experience for quest completion
          * - Award experience to affected attributes based on their attribute power
          * - Award quest strength points
-         * - Update quest's last completed at date from the quest completion record
+         * - Update quest's last completed date from the quest completion record
          * - Update quest's streak
          * - Increment rest_progress
          * - Leave last rest date unchanged
@@ -150,27 +160,59 @@ export class UserProcessorService {
           name: questName,
           strengthLevel: newStrengthLevel,
           strengthPoints: newStrengthPoints,
-          lastRestDate: quest.last_rest_date,
           streak: newStreak,
           restProgress: newRestProgress,
-          lastCompletedAt: questCompletion.completed_at,
+          lastCompletedDate: activityDate,
         };
         processedUser.quests.push(processedQuest);
       } else {
         /**
          * If the quest is not completed, need to:
          * - If days since last completion exceeds frequency...
-         *   - If rest_frequency is less than days since last completion...
+         *   - If rest_progress < rest_frequency...
          *     - Reset streak to 0
          *     - Reduce strength points
-         * - If rest_frequency...
-         *   - Set rest_available to false
-         * - update last rest date
+         *   - set rest_progress to 0
          * - leave user unchanged
          * - leave attributes unchanged
          * - leave last completed at unchanged
          * - log the strength point loss in the progression log
          */
+        const isQuestOverdue = isOverdue(
+          frequency,
+          lastCompletedDate,
+          activityDate,
+        );
+        if (isQuestOverdue) { 
+          let newStrengthLevel = strengthLevel;
+          let newStrengthPoints = strengthPoints;
+          if (restProgress < restFrequency) {
+            // Apply penalties for missed completion
+            const strengthPointLoss = calculateStrengthPointLoss(strengthLevel);
+            newStrengthPoints = Math.max(strengthPoints - strengthPointLoss, 0);
+            processedUser.progressionLogs.push(
+              createQuestStrengthProgressionLog(
+                processedUser.userId,
+                questId,
+                questName,
+                -strengthPointLoss,
+                newStrengthPoints,
+                streak,
+              ),
+            );
+            newStrengthLevel = calculateStrengthLevel(newStrengthPoints);
+          }
+          const processedQuest = {
+            questId,
+            name: questName,
+            strengthLevel: newStrengthLevel,
+            strengthPoints: newStrengthPoints,
+            streak: 0,
+            restProgress: 0,
+            lastCompletedDate: lastCompletedDate,
+          };
+          processedUser.quests.push(processedQuest);
+        }
       }
     });
   }
