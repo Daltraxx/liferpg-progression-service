@@ -290,6 +290,11 @@ INSERT INTO strength_levels (level, multiplier, min_points, max_points) VALUES
 ## Functions and Triggers Reference
 
 ### Handle New User Signup (Trigger)
+-- This trigger function listens for new user insertions into the auth.users table (handled by Supabase authentication) 
+-- and creates a corresponding record in our application-specific users table. 
+-- It extracts the email, username, and usertag from the raw_user_meta_data JSON field provided by Supabase during signup. 
+-- This ensures that every authenticated user has a corresponding profile in our users table, 
+-- which is necessary for linking quests, attributes, and progression data.
 
 ```sql
 -- Trigger Function
