@@ -3,6 +3,16 @@
  * By centralizing these values, we can ensure consistency and make it easier to manage changes in the future.
  */
 
+/**
+ * Base experience required for the first level of a user, and the exponent for calculating experience requirements for subsequent levels.
+ * The experience required to level up can be calculated using the formula:
+ * experienceRequired = USER_LEVEL_BASE_XP * (level ^ USER_LEVEL_EXPONENT_STEEPNESS)
+ * To calculate the level for a given amount of experience, you can use the inverse of this formula:
+ * level = Math.floor((experience / USER_LEVEL_BASE_XP) ^ (1 / USER_LEVEL_EXPONENT_STEEPNESS))
+ */
+export const USER_LEVEL_BASE_XP = 300;
+export const USER_LEVEL_EXPONENT_STEEPNESS = 3;
+
 /*
   * Strength levels for quests, ordered from weakest to strongest.
   * These levels are used to categorize quests and determine the strength points awarded for completion.
