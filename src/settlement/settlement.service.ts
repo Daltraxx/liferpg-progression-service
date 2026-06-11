@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { TimezoneDetectorService } from './pipeline/timezone-detector.service';
 import { UserAggregatorService } from './pipeline/user-aggregator.service';
+import { UserProcessorService } from './pipeline/user-processor.service';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { SettlementDataArray } from './schemas/settlement-data.schema';
 
@@ -28,6 +29,7 @@ export class SettlementService {
   constructor(
     private readonly timezoneDetectorService: TimezoneDetectorService,
     private readonly userAggregatorService: UserAggregatorService,
+    private readonly userProcessorService: UserProcessorService,
   ) {}
 
   @Cron(CronExpression.EVERY_HOUR)
@@ -49,19 +51,21 @@ export class SettlementService {
         return;
       }
 
-      // Step 2: Get aggregated user data for users in those timezones
+      // Step 2: Get settlement data for users in those timezones
       const settlementData: SettlementDataArray =
         await this.userAggregatorService.getSettlementData(timezonesToProcess);
 
       this.logger.debug(
-        `Aggregated user data retrieved for ${settlementData.length} users`,
+        `Settlement data retrieved for ${settlementData.length} users`,
       );
       if (settlementData.length === 0) {
         this.logger.log('No users to process. Settlement pipeline completed.');
         return;
       }
 
-      // Step 4: Use aggregated user data to create a single pre-transaction object
+      // Step 4: Use settlement data to create a single pre-transaction object for each user
+      const processedUsers = this.userProcessorService.processUsers(settlementData);
+      this.logger.debug(`Processed settlement data for ${processedUsers.length} users`);
 
       // Step 5: For each user, commit update to the database in a transaction via rpc call with the pre-transaction object as the payload
     } catch (error) {
