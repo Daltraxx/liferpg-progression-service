@@ -14,23 +14,33 @@ import {
   createQuestStrengthProgressionLog,
 } from '../rules/progression-log.rule';
 import isOverdue from '../rules/is-overdue.rule';
-import { calculateStrengthPointGain, calculateStrengthPointLoss } from '../rules/strength-points.rule';
-import { calculateStrengthLevel } from '../rules/levels.rule';
+import {
+  calculateStrengthPointGain,
+  calculateStrengthPointLoss,
+} from '../rules/strength-points.rule';
+import {
+  calculateAttributeLevel,
+  calculateStrengthLevel,
+  calculateUserLevel,
+} from '../rules/levels.rule';
 import getActivityDate from '../utils/get-activity-date';
 
 @Injectable()
 export class UserProcessorService {
-  
-
   processUsers(settlementData: SettlementDataArray): ProcessedUserData[] {
     if (settlementData.length === 0) {
       return [];
     }
     const activityDate = getActivityDate(settlementData[0].user.timezone);
-    return settlementData.map((userData) => this.processUser(userData, activityDate));
+    return settlementData.map((userData) =>
+      this.processUser(userData, activityDate),
+    );
   }
 
-  private processUser(userData: SettlementData, activityDate: string): ProcessedUserData {
+  private processUser(
+    userData: SettlementData,
+    activityDate: string,
+  ): ProcessedUserData {
     const processedUser: ProcessedUserData = {
       userId: userData.user.id,
       experience: userData.user.experience,
@@ -183,7 +193,7 @@ export class UserProcessorService {
           lastCompletedDate,
           activityDate,
         );
-        if (isQuestOverdue) { 
+        if (isQuestOverdue) {
           let newStrengthLevel = strengthLevel;
           let newStrengthPoints = strengthPoints;
           if (restProgress < restFrequency) {
@@ -214,6 +224,18 @@ export class UserProcessorService {
           processedUser.quests.push(processedQuest);
         }
       }
+
+      // Calculate final attribute levels after processing all quests
+      attributeMap.forEach((attribute) => {
+        const newLevel = calculateAttributeLevel(attribute.experience);
+        attribute.level = newLevel;
+        processedUser.attributes.push(attribute);
+      });
     });
+
+    // Calculate final user level after processing all quests
+    processedUser.level = calculateUserLevel(processedUser.experience);
+
+    return processedUser;
   }
 }
