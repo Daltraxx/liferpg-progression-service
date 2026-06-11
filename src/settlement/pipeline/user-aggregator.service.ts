@@ -35,13 +35,13 @@ export class UserAggregatorService {
       );
     }
 
-    const payload = typeof data === 'string' ? JSON.parse(data) : data;
     try {
+      const payload = typeof data === 'string' ? JSON.parse(data) : data;
       const validatedUserData: SettlementDataArray =
         SettlementDataArraySchema.parse(payload);
       return validatedUserData;
     } catch (error) {
-      throw new Error(`Settlement users data validation failed:`, {
+      throw new Error(`Error parsing or validating settlement users data`, {
         cause: error,
       });
     }
