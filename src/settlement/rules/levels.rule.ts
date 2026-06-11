@@ -1,7 +1,7 @@
 import {
   type StrengthLevel,
   STRENGTH_LEVEL_THRESHOLDS,
-  ATTRIBUTE_BASE_LEVEL_EXP,
+  ATTRIBUTE_LEVEL_BASE_XP,
   ATTRIBUTE_LEVEL_EXPONENT_STEEPNESS,
 } from '../../common/constants';
 
@@ -38,8 +38,8 @@ export const calculateStrengthLevel = (
  */
 export const calculateAttributeLevel = (experience: number): number => {
   const startingLevel = 1;
-  if (experience < ATTRIBUTE_BASE_LEVEL_EXP) return startingLevel;
-  const rawLevel = Math.cbrt(experience / ATTRIBUTE_BASE_LEVEL_EXP);
+  if (experience < ATTRIBUTE_LEVEL_BASE_XP) return startingLevel;
+  const rawLevel = Math.cbrt(experience / ATTRIBUTE_LEVEL_BASE_XP);
   return Math.floor(rawLevel) + startingLevel;
 };
 
@@ -57,7 +57,7 @@ export const calculateExperienceForLevel = (level: number): number => {
   const startingLevel = 1;
   if (level <= startingLevel) return 0;
   return (
-    ATTRIBUTE_BASE_LEVEL_EXP *
+    ATTRIBUTE_LEVEL_BASE_XP *
     Math.pow(level - startingLevel, ATTRIBUTE_LEVEL_EXPONENT_STEEPNESS)
   );
 };

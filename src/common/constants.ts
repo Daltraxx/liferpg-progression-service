@@ -32,9 +32,9 @@ export const STRENGTH_LEVEL_THRESHOLDS: Record<StrengthLevel, number> = {
  * Base experience required for the first level of an attribute, 
  * and the exponent for calculating experience requirements for subsequent levels.
  * The experience required to level up an attribute can be calculated using the formula:
- * experienceRequired = ATTRIBUTE_BASE_LEVEL_EXP * (level ^ ATTRIBUTE_LEVEL_EXPONENT_STEEPNESS)
+ * experienceRequired = ATTRIBUTE_LEVEL_BASE_XP * (level ^ ATTRIBUTE_LEVEL_EXPONENT_STEEPNESS)
  * To calculate the level for a given amount of experience, you can use the inverse of this formula:
- * level = Math.floor((experience / ATTRIBUTE_BASE_LEVEL_EXP) ^ (1 / ATTRIBUTE_LEVEL_EXPONENT_STEEPNESS))
+ * level = Math.floor((experience / ATTRIBUTE_LEVEL_BASE_XP) ^ (1 / ATTRIBUTE_LEVEL_EXPONENT_STEEPNESS))
  */
-export const ATTRIBUTE_BASE_LEVEL_EXP = 10;
+export const ATTRIBUTE_LEVEL_BASE_XP = 10;
 export const ATTRIBUTE_LEVEL_EXPONENT_STEEPNESS = 3;
