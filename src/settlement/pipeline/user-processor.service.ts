@@ -32,7 +32,7 @@ export class UserProcessorService {
       return [];
     }
 
-    // Because all users in the settlementData array have a timezone that just had a day end, 
+    // Because all users in the settlementData array have a timezone that just had a day end,
     // we can use the first user's timezone to determine the activity date for all users in this batch
     const activityDate = getActivityDate(settlementData[0].user.timezone);
     return settlementData.map((userData) =>
@@ -237,13 +237,13 @@ export class UserProcessorService {
           processedUser.quests.push(processedQuest);
         }
       }
+    });
 
-      // Calculate final attribute levels after processing all quests
-      attributeMap.forEach((attribute) => {
-        const newLevel = calculateAttributeLevel(attribute.experience);
-        attribute.level = newLevel;
-        processedUser.attributes.push(attribute);
-      });
+    // Calculate final attribute levels after processing all quests
+    attributeMap.forEach((attribute) => {
+      const newLevel = calculateAttributeLevel(attribute.experience);
+      attribute.level = newLevel;
+      processedUser.attributes.push(attribute);
     });
 
     // Calculate final user level after processing all quests
