@@ -5,6 +5,7 @@ import { UserProcessorService } from './pipeline/user-processor.service';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { SettlementDataArray } from './schemas/settlement-data.schema';
 import { END_OF_DAY_HOUR } from '../common/constants';
+import { ProcessedUserData } from './types/processed-data.types';
 
 /**
  * Orchestrates the settlement service pipeline, which includes the following steps:
@@ -40,7 +41,9 @@ export class SettlementService {
 
       // Step 1: Gather timezones whose day has just ended (end of day in this context is currently defined as 2am)
       const timezonesToProcess =
-        this.timezoneDetectorService.getTimezonesWithDayJustEnded(END_OF_DAY_HOUR);
+        this.timezoneDetectorService.getTimezonesWithDayJustEnded(
+          END_OF_DAY_HOUR,
+        );
       this.logger.debug(
         `Timezones to process: ${timezonesToProcess.join(', ')}`,
       );
@@ -65,8 +68,11 @@ export class SettlementService {
       }
 
       // Step 3: Use settlement data to create a single pre-transaction object for each user
-      const processedUsers = this.userProcessorService.processUsers(settlementData);
-      this.logger.debug(`Processed settlement data for ${processedUsers.length} users`);
+      const processedUsers: ProcessedUserData[] =
+        this.userProcessorService.processUsers(settlementData);
+      this.logger.debug(
+        `Processed settlement data for ${processedUsers.length} users`,
+      );
 
       // Step 4: For each user, commit update to the database in a transaction via rpc call with the pre-transaction object as the payload
     } catch (error) {
