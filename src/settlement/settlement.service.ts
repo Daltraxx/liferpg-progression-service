@@ -6,6 +6,7 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { SettlementDataArray } from './schemas/settlement-data.schema';
 import { END_OF_DAY_HOUR } from '../common/constants';
 import { ProcessedUserData } from './types/processed-data.types';
+import { ProgressionCommitService } from './pipeline/progression-commit.service';
 
 /**
  * Orchestrates the settlement service pipeline, which includes the following steps:
@@ -32,6 +33,7 @@ export class SettlementService {
     private readonly timezoneDetectorService: TimezoneDetectorService,
     private readonly userAggregatorService: UserAggregatorService,
     private readonly userProcessorService: UserProcessorService,
+    private readonly progressionCommitService: ProgressionCommitService,
   ) {}
 
   @Cron(CronExpression.EVERY_HOUR)
@@ -74,7 +76,12 @@ export class SettlementService {
         `Processed settlement data for ${processedUsers.length} users`,
       );
 
-      // Step 4: For each user, commit update to the database in a transaction via rpc call with the pre-transaction object as the payload
+      // Step 4: For each user, commit update to the database in a transaction via rpc call
+      // with the pre-transaction object as the payload
+      await this.progressionCommitService.commitProgression(processedUsers);
+      this.logger.log(
+        'Progression committed to database. Settlement pipeline completed successfully',
+      );
     } catch (error) {
       this.logger.error('Settlement pipeline error:', error);
       // Depending on the error, we may want to implement retry logic here or alert via an external system,
