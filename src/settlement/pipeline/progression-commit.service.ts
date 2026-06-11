@@ -21,7 +21,7 @@ export class ProgressionCommitService {
   ): Promise<void> {
     const supabase = this.supabaseProvider.client;
     const { error } = await supabase.rpc('commit_progression', {
-      p_processed_user_data: processedUserData,
+      p_processed_progression_data: processedUserData,
     });
     if (error) {
       throw new Error(`Error committing user progression: ${error.message}`);
