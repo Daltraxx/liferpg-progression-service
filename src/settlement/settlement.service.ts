@@ -7,6 +7,7 @@ import { SettlementDataArray } from './schemas/settlement-data.schema';
 import { END_OF_DAY_HOUR } from '../common/constants';
 import { ProcessedUserData } from './types/processed-data.types';
 import { ProgressionCommitService } from './pipeline/progression-commit.service';
+import getActivityDate from './utils/get-activity-date';
 
 /**
  * Orchestrates the settlement service pipeline, which includes the following steps:
@@ -70,15 +71,18 @@ export class SettlementService {
       }
 
       // Step 3: Use settlement data to create a single pre-transaction object for each user
+      // Because all users in the settlementData array have a timezone that just had a day end,
+      // we can use the first user's timezone to determine the activity date for all users in this batch
+      const activityDate = getActivityDate(settlementData[0].user.timezone);
       const processedUsers: ProcessedUserData[] =
-        this.userProcessorService.processUsers(settlementData);
+        this.userProcessorService.processUsers(settlementData, activityDate);
       this.logger.debug(
         `Processed settlement data for ${processedUsers.length} users`,
       );
 
       // Step 4: For each user, commit update to the database in a transaction via rpc call
       // with the pre-transaction object as the payload
-      await this.progressionCommitService.commitProgression(processedUsers);
+      await this.progressionCommitService.commitProgression(processedUsers, activityDate);
       this.logger.log(
         'Progression committed to database. Settlement pipeline completed successfully',
       );
