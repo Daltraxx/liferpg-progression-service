@@ -48,7 +48,7 @@ Full table can be found on the Supabase dashboard.
   - Whether user has defined their quests and attributes
 - `level`: INT DEFAULT 1 NOT NULL
   - Overall player level
-- `experience`: DECIMAL(10, 2) NOT NULL DEFAULT 0
+- `experience`: INT NOT NULL DEFAULT 0
   - Total experience points
 - `updated_at`: TIMESTAMPTZ DEFAULT NOW() NOT NULL
   - Timestamp of last update
@@ -70,7 +70,7 @@ Full table can be found on the Supabase dashboard.
   - Attribute name (max 50 chars, unique per user)
 - `level`: INT DEFAULT 1 NOT NULL
   - Current attribute level
-- `experience`: DECIMAL(10, 2) NOT NULL DEFAULT 0
+- `experience`: INT NOT NULL DEFAULT 0
   - Attribute experience points
 - `position`: INT NOT NULL CHECK (position >= 0)
   - Display order for attribute list (unique per user)
@@ -146,7 +146,7 @@ Full table can be found on the Supabase dashboard.
   - Timestamp when this completion was processed for experience and streak updates
 - `streak`: INT DEFAULT 1 NOT NULL
   - Streak at time of completion
-- `experience_earned`: DECIMAL(8, 2) DEFAULT 0 NOT NULL
+- `experience_earned`: INT DEFAULT 0 NOT NULL
   - Experience points awarded
 - `updated_at`: TIMESTAMPTZ DEFAULT NOW() NOT NULL
   - Timestamp of last update
