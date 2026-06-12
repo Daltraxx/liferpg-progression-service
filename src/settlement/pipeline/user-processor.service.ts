@@ -24,9 +24,25 @@ import {
   calculateUserLevel,
 } from '../rules/levels.rule';
 
+/**
+ * Service for processing settlement user data including quests, attributes, and progression tracking.
+ *
+ * This service handles the batch processing of user settlement data, calculating experience gains,
+ * strength point adjustments, and level calculations based on quest completion status and frequency rules.
+ */
 @Injectable()
 export class UserProcessorService {
-  processUsers(settlementData: SettlementDataArray, activityDate: string): ProcessedUserData[] {
+  /**
+   * Processes a batch of settlement user data for a given activity date.
+   *
+   * @param settlementData - Array of settlement data containing user and quest information
+   * @param activityDate - The date of the activity being processed (ISO string format)
+   * @returns Array of processed user data with updated experience, levels, and progression logs
+   */
+  processUsers(
+    settlementData: SettlementDataArray,
+    activityDate: string,
+  ): ProcessedUserData[] {
     if (settlementData.length === 0) {
       return [];
     }
@@ -38,6 +54,19 @@ export class UserProcessorService {
     );
   }
 
+  /**
+   * Processes a single user's settlement data including quest completion tracking and attribute progression.
+   *
+   * For completed quests, awards experience to the user and affected attributes, updates strength points and streak.
+   * For incomplete quests, applies penalties if overdue based on frequency and rest progress rules.
+   *
+   * @param userData - The settlement data for a single user
+   * @param activityDate - The date of the activity being processed (ISO string format)
+   * @returns Processed user data with updated experience, levels, quests, attributes, and progression logs
+   *
+   * @throws Error if a completed quest has no associated attributes
+   * @throws Error if a quest references an attribute that doesn't exist
+   */
   private processUser(
     userData: SettlementData,
     activityDate: string,
