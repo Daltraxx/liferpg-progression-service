@@ -75,13 +75,6 @@ export type Database = {
             foreignKeyName: 'user_attributes_user_id_fkey';
             columns: ['user_id'];
             isOneToOne: false;
-            referencedRelation: 'user_progress';
-            referencedColumns: ['user_id'];
-          },
-          {
-            foreignKeyName: 'user_attributes_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
             referencedRelation: 'users';
             referencedColumns: ['id'];
           },
@@ -113,13 +106,6 @@ export type Database = {
           user_timezone?: string;
         };
         Relationships: [
-          {
-            foreignKeyName: 'daily_progression_batches_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_progress';
-            referencedColumns: ['user_id'];
-          },
           {
             foreignKeyName: 'daily_progression_batches_user_id_fkey';
             columns: ['user_id'];
@@ -195,13 +181,6 @@ export type Database = {
             foreignKeyName: 'progression_log_user_id_fkey';
             columns: ['user_id'];
             isOneToOne: false;
-            referencedRelation: 'user_progress';
-            referencedColumns: ['user_id'];
-          },
-          {
-            foreignKeyName: 'progression_log_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
             referencedRelation: 'users';
             referencedColumns: ['id'];
           },
@@ -239,13 +218,6 @@ export type Database = {
           user_id?: string;
         };
         Relationships: [
-          {
-            foreignKeyName: 'quest_completions_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_progress';
-            referencedColumns: ['user_id'];
-          },
           {
             foreignKeyName: 'quest_completions_user_id_fkey';
             columns: ['user_id'];
@@ -326,13 +298,6 @@ export type Database = {
             foreignKeyName: 'tasks_user_id_fkey';
             columns: ['user_id'];
             isOneToOne: false;
-            referencedRelation: 'user_progress';
-            referencedColumns: ['user_id'];
-          },
-          {
-            foreignKeyName: 'tasks_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
             referencedRelation: 'users';
             referencedColumns: ['id'];
           },
@@ -377,13 +342,6 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: 'quests';
             referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'tasks_attributes_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_progress';
-            referencedColumns: ['user_id'];
           },
           {
             foreignKeyName: 'tasks_attributes_user_id_fkey';
@@ -468,17 +426,7 @@ export type Database = {
       };
     };
     Views: {
-      user_progress: {
-        Row: {
-          experience: number | null;
-          level: number | null;
-          total_strength: number | null;
-          total_tasks: number | null;
-          user_id: string | null;
-          username: string | null;
-        };
-        Relationships: [];
-      };
+      [_ in never]: never;
     };
     Functions: {
       before_user_created_check_usertag: {
