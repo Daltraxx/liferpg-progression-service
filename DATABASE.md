@@ -186,7 +186,7 @@ Full table can be found on the Supabase dashboard.
 - `idx_quests_attributes_attribute_id` ON (attribute_id)
   - Fast lookups by attribute
 
-**progression_log**: Audit trail of all experience transactions from daily settlement pipeline
+**progression_logs**: Audit trail of all experience transactions from daily settlement pipeline
 
 - Notes on insertions:
   - Each record represents a single experience change event, whether from quest completion, level up, or attribute progression
@@ -231,13 +231,13 @@ Full table can be found on the Supabase dashboard.
 - CHECK constraint: (quest_id IS NULL OR quest_name IS NOT NULL) AND (attribute_id IS NULL OR attribute_name IS NOT NULL)
   - Ensures quest_name exists when quest_id is set, and attribute_name exists when attribute_id is set
 
-**progression_log Indexes**:
+**progression_logs Indexes**:
 
-- `idx_progression_log_user_id` ON (user_id)
+- `idx_progression_logs_user_id` ON (user_id)
   - Fast lookups by user
-- `idx_progression_log_created_at` ON (created_at)
+- `idx_progression_logs_created_at` ON (created_at)
   - Fast lookups by timestamp
-- `idx_progression_log_user_created_at` ON (user_id, created_at)
+- `idx_progression_logs_user_created_at` ON (user_id, created_at)
   - Fast lookups by user and timestamp range
 
 **daily_progression_batches**: Tracks execution of daily progression batch job for auditing and debugging
