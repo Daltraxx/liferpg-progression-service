@@ -129,7 +129,7 @@ export type Database = {
           },
         ];
       };
-      progression_log: {
+      progression_logs: {
         Row: {
           attribute_id: number | null;
           attribute_name: string | null;
