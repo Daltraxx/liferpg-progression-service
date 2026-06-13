@@ -567,6 +567,7 @@ $$;
 -- Takes processed progression data for a user and the activity date for which the progression is being committed
 -- This function is intended to be called for each user during the daily settlement batch job after calculations have been performed based on the data retrieved from get_settlement_users_data. It will handle all necessary updates to the users, quests, attributes, and progression_logs tables in a single transaction to ensure data integrity. The function also includes validation of the input data and error handling to catch any issues during the update process.
 -- Safe to call multiple times for the same user and activity date due to the unique constraint on daily_progression_batches, which prevents duplicate processing and allows for idempotent retries in case of failures.
+-- Service role permissions are required to execute this function and its helper function due to the need for updating multiple tables and ensuring proper access control.
 
 ``` sql
 -- Define a function to commit user progression updates to the database in a transaction
