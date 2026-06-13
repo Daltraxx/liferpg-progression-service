@@ -13,6 +13,7 @@ export class ProgressionCommitService {
   /**
    * Commits processed user progression data to the database.
    * @param processedUserData - Array of processed user data objects to commit
+   * @param activityDate - The activity date for which the progression is being committed (in user's local timezone, e.g. "2024-06-01")
    * @throws {Error} If the RPC call fails
    * @returns Promise that resolves when the progression is successfully committed
    */
@@ -21,8 +22,10 @@ export class ProgressionCommitService {
     activityDate: string
   ): Promise<void> {
     const supabase = this.supabaseProvider.client;
+    // Ensure data is properly serialized for RPC (necessary for satisfying Postgres JSONB input requirements)
+    const payload = JSON.parse(JSON.stringify(processedUserData));
     const { error } = await supabase.rpc('commit_progression', {
-      p_processed_progression_data: processedUserData,
+      p_processed_progression_data: payload,
       p_activity_date: activityDate,
     });
     if (error) {

@@ -433,6 +433,10 @@ export type Database = {
         Args: { event: Json };
         Returns: Json;
       };
+      commit_progression: {
+        Args: { p_activity_date: string; p_processed_progression_data: Json };
+        Returns: undefined;
+      };
       create_profile_transaction: {
         Args: {
           p_attributes: Json;
@@ -445,6 +449,10 @@ export type Database = {
       get_settlement_users_data: {
         Args: { p_timezones: string[] };
         Returns: Json;
+      };
+      update_progression: {
+        Args: { p_activity_date: string; p_user_progression: Json };
+        Returns: undefined;
       };
     };
     Enums: {
