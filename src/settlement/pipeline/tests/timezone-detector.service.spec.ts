@@ -1,7 +1,11 @@
 import { Test } from '@nestjs/testing';
-import { TimezoneDetectorService } from './timezone-detector.service';
+import { TimezoneDetectorService } from '../timezone-detector.service';
 import { TZDate } from '@date-fns/tz';
 
+/**
+ * Map to track the local hour for each timezone during testing.
+ * Used to mock the behavior of TZDate.getHours() for different timezones.
+ */
 const timezoneHourMap: Record<string, number> = {};
 
 jest.mock('@date-fns/tz', () => ({
@@ -10,10 +14,19 @@ jest.mock('@date-fns/tz', () => ({
   })),
 }));
 
+/**
+ * Test suite for the TimezoneDetectorService.
+ * Tests the functionality of detecting timezones based on local hour matching.
+ */
 describe('TimezoneDetectorService', () => {
   let service: TimezoneDetectorService;
+  /** Spy on the Intl.supportedValuesOf method to control supported timezones */
   let supportedValuesOfSpy: jest.SpiedFunction<typeof Intl.supportedValuesOf>;
 
+  /**
+   * Set up test fixtures before each test.
+   * Clears the timezone hour map and mocks the supported timezones.
+   */
   beforeEach(() => {
     Object.keys(timezoneHourMap).forEach((key) => {
       delete timezoneHourMap[key];
@@ -21,18 +34,22 @@ describe('TimezoneDetectorService', () => {
 
     supportedValuesOfSpy = jest
       .spyOn(Intl, 'supportedValuesOf')
-      .mockReturnValue([
-        'America/New_York',
-        'Europe/London',
-        'Asia/Tokyo',
-      ]);
+      .mockReturnValue(['America/New_York', 'Europe/London', 'Asia/Tokyo']);
   });
 
+  /**
+   * Clean up after each test.
+   * Restores the spy and clears all mocks.
+   */
   afterEach(() => {
     supportedValuesOfSpy.mockRestore();
     jest.clearAllMocks();
   });
 
+  /**
+   * Initialize the TimezoneDetectorService for testing.
+   * Creates the testing module and retrieves the service instance.
+   */
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
       providers: [TimezoneDetectorService],
@@ -40,6 +57,8 @@ describe('TimezoneDetectorService', () => {
 
     service = moduleRef.get<TimezoneDetectorService>(TimezoneDetectorService);
   });
+
+  // TEST CASES
 
   it('should be defined', () => {
     expect(service).toBeDefined();
