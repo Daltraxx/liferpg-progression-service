@@ -165,6 +165,55 @@ describe('UserProcessorService', () => {
           id: 1,
           name: 'Morning Run',
           strength_level: 'E',
+          strength_points: 10,
+          frequency: 1,
+          rest_frequency: 2,
+          rest_progress: 0,
+          streak: 4,
+          last_completed_date: '2026-06-10',
+        },
+      ],
+    });
+
+    const result = service.processUsers(settlementData, activityDate);
+    const processedQuest = result[0].quests[0];
+    const expectedQuestId = settlementData[0].quests[0].id;
+    const strengthPointLoss = calculateStrengthPointLoss(
+      settlementData[0].quests[0].strength_level,
+    );
+    const expectedStrengthPoints =
+      settlementData[0].quests[0].strength_points - strengthPointLoss;
+    const expectedStreak = 0;
+    const expectedRestProgress = 0;
+    const expectedLastCompletedDate =
+      settlementData[0].quests[0].last_completed_date;
+
+    expect(processedQuest).toEqual(
+      expect.objectContaining({
+        questId: expectedQuestId,
+        strengthPoints: expectedStrengthPoints,
+        streak: expectedStreak,
+        restProgress: expectedRestProgress,
+        lastCompletedDate: expectedLastCompletedDate,
+      }),
+    );
+    expect(result[0].progressionLogs).toHaveLength(1);
+    expect(result[0].progressionLogs[0]).toEqual(
+      expect.objectContaining({
+        target: 'quest_strength',
+        points: -strengthPointLoss,
+      }),
+    );
+  });
+
+  it('applies overdue penalty when quest is overdue and rest progress is below rest frequency, and strength_points cannot be reduced below 0', () => {
+    const settlementData = buildSettlementData({
+      quest_completions: [],
+      quests: [
+        {
+          id: 1,
+          name: 'Morning Run',
+          strength_level: 'E',
           strength_points: 1,
           frequency: 1,
           rest_frequency: 2,
@@ -177,21 +226,33 @@ describe('UserProcessorService', () => {
 
     const result = service.processUsers(settlementData, activityDate);
     const processedQuest = result[0].quests[0];
+    const expectedQuestId = settlementData[0].quests[0].id;
+    const strengthPointLoss = calculateStrengthPointLoss(
+      settlementData[0].quests[0].strength_level,
+    );
+    const expectedStrengthPoints = Math.max(
+      settlementData[0].quests[0].strength_points - strengthPointLoss,
+      0,
+    );
+    const expectedStreak = 0;
+    const expectedRestProgress = 0;
+    const expectedLastCompletedDate =
+      settlementData[0].quests[0].last_completed_date;
 
     expect(processedQuest).toEqual(
       expect.objectContaining({
-        questId: 1,
-        strengthPoints: 0,
-        streak: 0,
-        restProgress: 0,
-        lastCompletedDate: '2026-06-10',
+        questId: expectedQuestId,
+        strengthPoints: expectedStrengthPoints,
+        streak: expectedStreak,
+        restProgress: expectedRestProgress,
+        lastCompletedDate: expectedLastCompletedDate,
       }),
     );
     expect(result[0].progressionLogs).toHaveLength(1);
     expect(result[0].progressionLogs[0]).toEqual(
       expect.objectContaining({
         target: 'quest_strength',
-        points: -2,
+        points: -strengthPointLoss,
       }),
     );
   });
