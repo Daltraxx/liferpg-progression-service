@@ -1,98 +1,392 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# LifeRPG Progression Service
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+The **LifeRPG Progression Service** is a standalone NestJS application responsible for executing the daily settlement pipeline for the LifeRPG platform.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+At the end of each user's day, the service evaluates quest completions, updates progression-related data, awards experience, calculates level gains, updates quest strength, distributes attribute experience, and records all progression events in an immutable audit log.
 
-## Description
+---
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Overview
 
-## Project setup
+LifeRPG uses a deferred progression model.
 
-```bash
-$ npm install
+When a user completes a quest, a record is inserted into the `quest_completions` table immediately. Progression rewards are not awarded at that time.
+
+Instead, an hourly settlement process determines which timezones have crossed their daily boundary and processes all outstanding quest completions for users within those timezones.
+
+This design provides:
+
+* Consistent progression calculations
+* Timezone-aware daily processing
+* Reduced database write volume
+* Full auditability through progression logs
+* Transactional integrity across progression updates
+
+---
+
+## Responsibilities
+
+The Progression Service is responsible for:
+
+### User Progression
+
+* Awarding user experience
+* Calculating user level increases
+* Updating:
+
+  * `users.experience`
+  * `users.level`
+  * `users.updated_at`
+
+### Quest Progression
+
+* Updating quest streaks
+* Applying rest day logic
+* Awarding or deducting quest strength points
+* Determining quest strength rank changes
+* Updating:
+
+  * `quests.streak`
+  * `quests.rest_progress`
+  * `quests.strength_points`
+  * `quests.strength_level`
+  * `quests.last_completed_date`
+  * `quests.updated_at`
+
+### Attribute Progression
+
+* Awarding experience to affected attributes
+* Calculating attribute level increases
+* Updating:
+
+  * `attributes.experience`
+  * `attributes.level`
+  * `attributes.updated_at`
+
+### Audit Logging
+
+Creating immutable progression records in:
+
+* `progression_logs`
+
+Tracking execution batches in:
+
+* `daily_progression_batches`
+
+### Completion Processing
+
+Marking processed quest completions:
+
+* `quest_completions.processed_at`
+
+---
+
+## High-Level Pipeline Flow
+
+```text
+┌──────────────────────┐
+│ Hourly Cron Trigger  │
+└──────────┬───────────┘
+           │
+           ▼
+┌──────────────────────┐
+│ Determine Timezones  │
+│ Crossing 2:00 AM     │
+└──────────┬───────────┘
+           │
+           ▼
+┌──────────────────────┐
+│ Fetch Settlement     │
+│ Data from Supabase   │
+└──────────┬───────────┘
+           │
+           ▼
+┌──────────────────────┐
+│ Build Progression    │
+│ Updates In Memory    │
+└──────────┬───────────┘
+           │
+           ▼
+┌──────────────────────┐
+│ Execute Database     │
+│ Transaction          │
+└──────────┬───────────┘
+           │
+           ▼
+┌──────────────────────┐
+│ Write Logs & Batch   │
+│ Records              │
+└──────────────────────┘
 ```
 
-## Compile and run the project
+---
 
-```bash
-# development
-$ npm run start
+## Settlement Process
 
-# watch mode
-$ npm run start:dev
+### 1. Detect Eligible Timezones
 
-# production mode
-$ npm run start:prod
+The scheduler runs every hour.
+
+It determines which user timezones have crossed the configured settlement boundary:
+
+```text
+02:00 Local Time
 ```
 
-## Run tests
+Only users within those timezones are processed.
 
-```bash
-# unit tests
-$ npm run test
+---
 
-# e2e tests
-$ npm run test:e2e
+### 2. Retrieve Settlement Data
 
-# test coverage
-$ npm run test:cov
+The service calls:
+
+```sql
+public.get_settlement_users_data()
 ```
 
-## Deployment
+This RPC returns all data required to calculate progression:
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+* Users
+* Quests
+* Attributes
+* Quest completions
+* Quest ↔ Attribute relationships
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+in a single database round trip.
 
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+---
+
+### 3. Build Progression Updates
+
+For each user:
+
+#### Process Completed Quests
+
+Calculate:
+
+* User experience earned
+* Attribute experience earned
+* Quest strength gains
+* Streak increases
+* Rest progress increases
+
+#### Process Missing Required Quests
+
+Determine whether:
+
+* A streak should reset
+* A rest day should be consumed
+* Strength points should be deducted
+
+---
+
+### 4. Calculate Levels
+
+The service calculates:
+
+#### User Levels
+
+Based on accumulated experience.
+
+#### Quest Strength Levels
+
+Based on strength points.
+
+#### Attribute Levels
+
+Each attribute levels independently.
+
+---
+
+### 5. Generate Progression Logs
+
+Each progression event generates audit records.
+
+Examples:
+
+```text
+Completed quest "Workout"
++25 User Experience
+
+Completed quest "Workout"
++3 Strength Points
+
+Completed quest "Workout"
++10 Strength Experience (Fitness)
+
+Missed required quest "Read"
+-10 Strength Points
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+Logs are inserted into:
 
-## Resources
+```text
+progression_logs
+```
 
-Check out a few resources that may come in handy when working with NestJS:
+---
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+### 6. Execute Transaction
 
-## Support
+Once calculations are complete:
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+1. Create daily batch record
+2. Update users
+3. Update quests
+4. Update attributes
+5. Insert progression logs
+6. Mark quest completions processed
 
-## Stay in touch
+All changes are committed atomically.
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+If any operation fails, the entire transaction is rolled back.
 
-## License
+---
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+## Architecture
+
+```text
+src/
+│
+├── progression/
+│   ├── progression.module.ts
+│   ├── progression.service.ts
+│
+├── settlement/
+│   ├── settlement.module.ts
+│   ├── settlement.service.ts
+│
+├── scheduler/
+│   ├── scheduler.module.ts
+│   ├── scheduler.service.ts
+│
+├── supabase/
+│   ├── supabase.module.ts
+│   ├── supabase.service.ts
+│
+├── common/
+│   ├── interfaces/
+│   ├── utils/
+│   └── constants/
+│
+└── main.ts
+```
+
+---
+
+## Core Technologies
+
+### Framework
+
+* NestJS
+
+### Database
+
+* Supabase
+* PostgreSQL
+
+### Scheduling
+
+* @nestjs/schedule
+
+### Testing
+
+* Jest
+
+### Language
+
+* TypeScript
+
+---
+
+## Key Design Principles
+
+### Timezone-Aware Processing
+
+Progression is calculated using the user's configured timezone rather than UTC.
+
+---
+
+### Auditability
+
+Every progression change is persisted to:
+
+```text
+progression_logs
+```
+
+allowing complete reconstruction of user progression history.
+
+---
+
+### Transaction Safety
+
+Progression updates are committed as a single transaction.
+
+This prevents partial progression updates.
+
+---
+
+### Batch Processing
+
+Users are processed in batches grouped by timezone.
+
+This minimizes database load while ensuring correct daily boundaries.
+
+---
+
+## Future Enhancements
+
+### Retry Queue
+
+Retry failed settlement batches automatically.
+
+### Dead Letter Handling
+
+Persist failed progression calculations for manual inspection.
+
+### Metrics & Monitoring
+
+Track:
+
+* Settlement duration
+* Users processed
+* Failed batches
+* Experience awarded
+
+### Distributed Processing
+
+Scale settlement processing across multiple workers.
+
+---
+
+## Related Database Tables
+
+| Table                     | Purpose                       |
+| ------------------------- | ----------------------------- |
+| users                     | User progression              |
+| attributes                | User-defined attributes       |
+| quests                    | Quest progression             |
+| quest_completions         | Raw completion events         |
+| quests_attributes         | Quest ↔ Attribute mapping     |
+| progression_logs          | Audit trail                   |
+| daily_progression_batches | Settlement execution tracking |
+| strength_levels           | Strength rank lookup          |
+
+---
+
+## Development Status
+
+Current Status: **Operational**
+
+The service currently targets:
+
+* Hourly execution
+* Timezone-based settlement detection
+* Full progression calculations
+* Transactional database updates
+* Audit logging
+* Batch tracking
+
+Part of the LifeRPG platform progression infrastructure.
