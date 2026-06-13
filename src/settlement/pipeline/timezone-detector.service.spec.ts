@@ -1,0 +1,90 @@
+import { Test } from '@nestjs/testing';
+import { TimezoneDetectorService } from './timezone-detector.service';
+import { TZDate } from '@date-fns/tz';
+
+const timezoneHourMap: Record<string, number> = {};
+
+jest.mock('@date-fns/tz', () => ({
+  TZDate: jest.fn().mockImplementation((_date: Date, timezone: string) => ({
+    getHours: () => timezoneHourMap[timezone],
+  })),
+}));
+
+describe('TimezoneDetectorService', () => {
+  let service: TimezoneDetectorService;
+  let supportedValuesOfSpy: jest.SpiedFunction<typeof Intl.supportedValuesOf>;
+
+  beforeEach(() => {
+    Object.keys(timezoneHourMap).forEach((key) => {
+      delete timezoneHourMap[key];
+    });
+
+    supportedValuesOfSpy = jest
+      .spyOn(Intl, 'supportedValuesOf')
+      .mockReturnValue([
+        'America/New_York',
+        'Europe/London',
+        'Asia/Tokyo',
+      ]);
+  });
+
+  afterEach(() => {
+    supportedValuesOfSpy.mockRestore();
+    jest.clearAllMocks();
+  });
+
+  beforeEach(async () => {
+    const moduleRef = await Test.createTestingModule({
+      providers: [TimezoneDetectorService],
+    }).compile();
+
+    service = moduleRef.get<TimezoneDetectorService>(TimezoneDetectorService);
+  });
+
+  it('should be defined', () => {
+    expect(service).toBeDefined();
+  });
+
+  it('returns only timezones whose local hour matches the provided endOfDayHour', () => {
+    timezoneHourMap['America/New_York'] = 2;
+    timezoneHourMap['Europe/London'] = 3;
+    timezoneHourMap['Asia/Tokyo'] = 2;
+
+    const result = service.getTimezonesWithDayJustEnded(2);
+
+    expect(result).toEqual(['America/New_York', 'Asia/Tokyo']);
+    expect(TZDate).toHaveBeenCalledTimes(3);
+  });
+
+  it('uses 0 as the default endOfDayHour when omitted', () => {
+    timezoneHourMap['America/New_York'] = 0;
+    timezoneHourMap['Europe/London'] = 10;
+    timezoneHourMap['Asia/Tokyo'] = 11;
+
+    const result = service.getTimezonesWithDayJustEnded();
+
+    expect(result).toEqual(['America/New_York']);
+  });
+
+  it('returns an empty array when no timezone matches the provided hour', () => {
+    timezoneHourMap['America/New_York'] = 6;
+    timezoneHourMap['Europe/London'] = 7;
+    timezoneHourMap['Asia/Tokyo'] = 8;
+
+    const result = service.getTimezonesWithDayJustEnded(2);
+
+    expect(result).toEqual([]);
+  });
+
+  it('throws when endOfDayHour is less than 0', () => {
+    expect(() => service.getTimezonesWithDayJustEnded(-1)).toThrow(
+      'endOfDayHour must be between 0 and 23',
+    );
+  });
+
+  it('throws when endOfDayHour is greater than 23', () => {
+    expect(() => service.getTimezonesWithDayJustEnded(24)).toThrow(
+      'endOfDayHour must be between 0 and 23',
+    );
+  });
+});
