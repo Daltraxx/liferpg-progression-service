@@ -1,5 +1,5 @@
 import { Test } from '@nestjs/testing';
-import { TimezoneDetectorService } from '../timezone-detector.service';
+import { TimezoneDetectorService } from './timezone-detector.service';
 import { TZDate } from '@date-fns/tz';
 
 /**
