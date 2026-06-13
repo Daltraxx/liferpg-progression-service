@@ -15,7 +15,7 @@ jest.mock('@date-fns/tz', () => ({
 }));
 
 /**
- * Test suite for the TimezoneDetectorService.
+ * Test suite for {@link TimezoneDetectorService}.
  * Tests the functionality of detecting timezones based on local hour matching.
  */
 describe('TimezoneDetectorService', () => {
