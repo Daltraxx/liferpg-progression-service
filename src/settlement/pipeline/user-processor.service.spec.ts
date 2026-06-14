@@ -257,7 +257,7 @@ describe('UserProcessorService', () => {
     );
   });
 
-  it('resets overdue quest without penalty when rest progress has reached rest frequency', () => {
+  it('only updates rest_progress for incomplete overdue quest when rest progress has reached rest frequency', () => {
     const settlementData = buildSettlementData({
       quest_completions: [],
       quests: [
@@ -277,13 +277,20 @@ describe('UserProcessorService', () => {
 
     const result = service.processUsers(settlementData, activityDate);
     const processedQuest = result[0].quests[0];
+    const expectedStrengthPoints = settlementData[0].quests[0].strength_points;
+    const expectedStrengthLevel = settlementData[0].quests[0].strength_level;
+    const expectedStreak = settlementData[0].quests[0].streak;
+    const expectedRestProgress = 0;
+    const expectedLastCompletedDate =
+      settlementData[0].quests[0].last_completed_date;
 
     expect(processedQuest).toEqual(
       expect.objectContaining({
-        strengthPoints: 10,
-        strengthLevel: 'D',
-        streak: 0,
-        restProgress: 0,
+        strengthPoints: expectedStrengthPoints,
+        strengthLevel: expectedStrengthLevel,
+        streak: expectedStreak,
+        restProgress: expectedRestProgress,
+        lastCompletedDate: expectedLastCompletedDate,
       }),
     );
     expect(result[0].progressionLogs).toHaveLength(0);
