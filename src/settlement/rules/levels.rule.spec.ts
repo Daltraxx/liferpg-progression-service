@@ -7,12 +7,9 @@ import {
 } from './levels.rule';
 
 import {
-  type StrengthLevel,
   STRENGTH_LEVEL_THRESHOLDS,
   ATTRIBUTE_LEVEL_BASE_XP,
-  ATTRIBUTE_LEVEL_EXPONENT_STEEPNESS,
   USER_LEVEL_BASE_XP,
-  USER_LEVEL_EXPONENT_STEEPNESS,
 } from '../../common/constants';
 
 describe('levels.rule', () => {
