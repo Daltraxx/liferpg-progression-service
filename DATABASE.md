@@ -42,8 +42,6 @@ Full table can be found on the Supabase dashboard.
   - Account creation timestamp
 - `last_login`: TIMESTAMPTZ
   - Last login timestamp
-- `verified`: BOOLEAN DEFAULT FALSE NOT NULL
-  - Account verification status
 - `profile_complete`: BOOLEAN DEFAULT FALSE NOT NULL
   - Whether user has defined their quests and attributes
 - `level`: INT DEFAULT 1 NOT NULL
