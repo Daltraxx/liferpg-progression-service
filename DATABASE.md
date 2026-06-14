@@ -144,8 +144,6 @@ Full table can be found on the Supabase dashboard.
   - Completion timestamp
 - `processed_at`: TIMESTAMPTZ
   - Timestamp when this completion was processed for experience and streak updates
-- `streak`: INT DEFAULT 1 NOT NULL
-  - Streak at time of completion
 - `experience_earned`: INT DEFAULT 0 NOT NULL
   - Experience points awarded
 - `updated_at`: TIMESTAMPTZ DEFAULT NOW() NOT NULL
