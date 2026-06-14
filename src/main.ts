@@ -25,6 +25,7 @@ async function bootstrap() {
     await settlementService.runSettlementPipeline();
 
     await app.close();
+    process.exit(0);
   } catch (error) {
     console.error('Error during application bootstrap:', error);
     process.exit(1);
