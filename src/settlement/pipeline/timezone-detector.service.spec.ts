@@ -26,8 +26,10 @@ describe('TimezoneDetectorService', () => {
   /**
    * Set up test fixtures before each test.
    * Clears the timezone hour map and mocks the supported timezones.
+   * Initialize the TimezoneDetectorService for testing.
+   * Creates the testing module and retrieves the service instance
    */
-  beforeEach(() => {
+  beforeEach(async () => {
     Object.keys(timezoneHourMap).forEach((key) => {
       delete timezoneHourMap[key];
     });
@@ -35,6 +37,12 @@ describe('TimezoneDetectorService', () => {
     supportedValuesOfSpy = jest
       .spyOn(Intl, 'supportedValuesOf')
       .mockReturnValue(['America/New_York', 'Europe/London', 'Asia/Tokyo']);
+
+    const moduleRef = await Test.createTestingModule({
+      providers: [TimezoneDetectorService],
+    }).compile();
+
+    service = moduleRef.get<TimezoneDetectorService>(TimezoneDetectorService);
   });
 
   /**
@@ -45,19 +53,7 @@ describe('TimezoneDetectorService', () => {
     supportedValuesOfSpy.mockRestore();
     jest.clearAllMocks();
   });
-
-  /**
-   * Initialize the TimezoneDetectorService for testing.
-   * Creates the testing module and retrieves the service instance.
-   */
-  beforeEach(async () => {
-    const moduleRef = await Test.createTestingModule({
-      providers: [TimezoneDetectorService],
-    }).compile();
-
-    service = moduleRef.get<TimezoneDetectorService>(TimezoneDetectorService);
-  });
-
+  
   // TEST CASES
 
   it('should be defined', () => {
