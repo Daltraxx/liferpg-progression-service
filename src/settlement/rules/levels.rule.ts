@@ -79,7 +79,7 @@ export const calculateAttributeLevel = (experience: number): number => {
  * calculateExperienceForLevel(11); // returns experience required for level 11
  * calculateExperienceForLevel(21); // returns experience required for level 21
  */
-export const calculateExperienceForLevel = (level: number): number => {
+export const calculateExperienceForAttributeLevel = (level: number): number => {
   const startingLevel = 1;
   if (level <= startingLevel) return 0;
   // Floor the result in case exponent steepness is fractional
