@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ProcessedUserData } from '../types/processed-data.types';
 import { SupabaseProvider } from '../../database/supabase.provider';
+import { Json } from '../../database/database.types';
 
 /**
  * Service responsible for committing processed user progression data to the database.
@@ -23,7 +24,7 @@ export class ProgressionCommitService {
   ): Promise<void> {
     const supabase = this.supabaseProvider.client;
     // Ensure data is properly serialized for RPC (necessary for satisfying Postgres JSONB input requirements)
-    const payload = JSON.parse(JSON.stringify(processedUserData));
+    const payload: Json = JSON.parse(JSON.stringify(processedUserData));
     const { error } = await supabase.rpc('commit_progression', {
       p_processed_progression_data: payload,
       p_activity_date: activityDate,
