@@ -122,7 +122,7 @@ describe('UserAggregatorService', () => {
   });
 
   // TEST CASES
-  
+
   it('should be defined', () => {
     expect(service).toBeDefined();
   });

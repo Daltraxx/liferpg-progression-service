@@ -24,7 +24,9 @@ describe('levels.rule', () => {
 
     it('increases at the exact user level threshold boundaries', () => {
       expect(calculateUserLevel(USER_LEVEL_BASE_XP)).toBe(2);
-      expect(calculateUserLevel(calculateExperienceForUserLevel(3) - 1)).toBe(2);
+      expect(calculateUserLevel(calculateExperienceForUserLevel(3) - 1)).toBe(
+        2,
+      );
       expect(calculateUserLevel(calculateExperienceForUserLevel(3))).toBe(3);
     });
   });
@@ -50,8 +52,12 @@ describe('levels.rule', () => {
 
     it('increases at the exact attribute level threshold boundaries', () => {
       expect(calculateAttributeLevel(ATTRIBUTE_LEVEL_BASE_XP)).toBe(2);
-      expect(calculateAttributeLevel(calculateExperienceForAttributeLevel(3) - 1)).toBe(2);
-      expect(calculateAttributeLevel(calculateExperienceForAttributeLevel(3))).toBe(3);
+      expect(
+        calculateAttributeLevel(calculateExperienceForAttributeLevel(3) - 1),
+      ).toBe(2);
+      expect(
+        calculateAttributeLevel(calculateExperienceForAttributeLevel(3)),
+      ).toBe(3);
     });
   });
 
@@ -75,7 +81,7 @@ describe('levels.rule', () => {
       expect(calculateStrengthLevel((E + D) / 2)).toBe('E');
       expect(calculateStrengthLevel(E - 1)).toBe('E');
     });
-    
+
     it('returns the expected strength level at each value', () => {
       expect(calculateStrengthLevel(D)).toBe('D');
       expect(calculateStrengthLevel((D + C) / 2)).toBe('D');
@@ -86,7 +92,6 @@ describe('levels.rule', () => {
       expect(calculateStrengthLevel(A)).toBe('A');
       expect(calculateStrengthLevel((A + S) / 2)).toBe('A');
       expect(calculateStrengthLevel(S)).toBe('S');
-
     });
 
     it('returns the highest level for values above the top threshold', () => {

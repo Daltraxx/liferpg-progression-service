@@ -144,7 +144,8 @@ describe('UserProcessorService', () => {
       }),
     ]);
 
-    const attributeExperienceGain = settlementData[0].quests_attributes[0].attribute_power;
+    const attributeExperienceGain =
+      settlementData[0].quests_attributes[0].attribute_power;
     const expectedAttributeExperience =
       settlementData[0].attributes[0].experience + attributeExperienceGain;
 

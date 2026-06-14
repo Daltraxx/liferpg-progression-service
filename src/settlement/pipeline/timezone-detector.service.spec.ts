@@ -53,7 +53,7 @@ describe('TimezoneDetectorService', () => {
     supportedValuesOfSpy.mockRestore();
     jest.clearAllMocks();
   });
-  
+
   // TEST CASES
 
   it('should be defined', () => {

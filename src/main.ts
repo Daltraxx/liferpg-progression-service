@@ -7,10 +7,10 @@ async function bootstrap() {
     const app = await NestFactory.createApplicationContext(AppModule);
     // Application context is created, but we don't need to start an HTTP server since this is a background service
 
-    // We no longer need to set up manual shutdown hooks since 
-    // we will be triggering the settlement pipeline via a manual cron job in Render's dashboard 
+    // We no longer need to set up manual shutdown hooks since
+    // we will be triggering the settlement pipeline via a manual cron job in Render's dashboard
     // rather than running this as a continuously running service,
-    // but if we wanted to switch back to running this as a continuously running service in the future, 
+    // but if we wanted to switch back to running this as a continuously running service in the future,
     // we can easily add this back in by uncommenting the following lines:
     // const shutdownSignals: NodeJS.Signals[] = ['SIGINT', 'SIGTERM', 'SIGQUIT'];
     // shutdownSignals.forEach((signal) => {
@@ -31,4 +31,4 @@ async function bootstrap() {
     process.exit(1);
   }
 }
-bootstrap();
+void bootstrap();

@@ -19,7 +19,7 @@ export class ProgressionCommitService {
    */
   async commitProgression(
     processedUserData: ProcessedUserData[],
-    activityDate: string
+    activityDate: string,
   ): Promise<void> {
     const supabase = this.supabaseProvider.client;
     // Ensure data is properly serialized for RPC (necessary for satisfying Postgres JSONB input requirements)

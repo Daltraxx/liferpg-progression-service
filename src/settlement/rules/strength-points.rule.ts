@@ -1,4 +1,7 @@
-import { type StrengthLevel, STRENGTH_POINT_LOSS_MAP } from '../../common/constants';
+import {
+  type StrengthLevel,
+  STRENGTH_POINT_LOSS_MAP,
+} from '../../common/constants';
 
 /**
  * Calculates the strength point gain for quest completion based on a streak value.
