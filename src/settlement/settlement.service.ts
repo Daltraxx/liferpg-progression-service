@@ -2,7 +2,6 @@ import { Injectable, Logger } from '@nestjs/common';
 import { TimezoneDetectorService } from './pipeline/timezone-detector.service';
 import { UserAggregatorService } from './pipeline/user-aggregator.service';
 import { UserProcessorService } from './pipeline/user-processor.service';
-import { Cron, CronExpression } from '@nestjs/schedule';
 import { SettlementDataArray } from './schemas/settlement-data.schema';
 import { END_OF_DAY_HOUR } from '../common/constants';
 import { ProcessedUserData } from './types/processed-data.types';
@@ -37,7 +36,10 @@ export class SettlementService {
     private readonly progressionCommitService: ProgressionCommitService,
   ) {}
 
-  @Cron(CronExpression.EVERY_HOUR)
+  // @Cron(CronExpression.EVERY_HOUR)
+  // With current deployment on Render,
+  // we will trigger this pipeline via a manual cron job setup in Render's dashboard rather than using NestJS's scheduling module,
+  // but this can be easily added back in if we want to switch to using NestJS's scheduling in the future
   async runSettlementPipeline() {
     try {
       this.logger.log('Settlement pipeline started');
@@ -82,7 +84,10 @@ export class SettlementService {
 
       // Step 4: For each user, commit update to the database in a transaction via rpc call
       // with the pre-transaction object as the payload
-      await this.progressionCommitService.commitProgression(processedUsers, activityDate);
+      await this.progressionCommitService.commitProgression(
+        processedUsers,
+        activityDate,
+      );
       this.logger.log(
         'Progression committed to database. Settlement pipeline completed successfully',
       );

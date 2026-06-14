@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { ScheduleModule } from '@nestjs/schedule';
 import { DatabaseModule } from './database/database.module';
 import { SettlementModule } from './settlement/settlement.module';
 
@@ -9,7 +8,9 @@ import { SettlementModule } from './settlement/settlement.module';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    ScheduleModule.forRoot(),
+    // ScheduleModule.forRoot(),
+    // We are not currently using NestJS's scheduling module to trigger the settlement pipeline, 
+    // but we may want to add this back in if we want to switch to using NestJS's scheduling in the future
     DatabaseModule,
     SettlementModule,
   ],
