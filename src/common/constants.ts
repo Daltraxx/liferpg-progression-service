@@ -63,3 +63,17 @@ export const STRENGTH_LEVEL_THRESHOLDS: Record<StrengthLevel, number> = {
   A: 400,
   S: 500,
 };
+
+/**
+ * The strength points lost for not completing a quest, based on the current strength level of the quest.
+ * This mapping defines how many strength points a user will lose if they fail to complete a quest,
+ * depending on the quest's current strength level. Higher strength levels result in greater point losses.
+ */
+export const STRENGTH_POINT_LOSS_MAP: Record<StrengthLevel, number> = {
+  E: 2,
+  D: 5,
+  C: 10,
+  B: 15,
+  A: 18,
+  S: 20,
+};

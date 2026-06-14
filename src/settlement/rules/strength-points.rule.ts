@@ -1,12 +1,12 @@
-import { StrengthLevel } from '../../common/constants';
+import { type StrengthLevel, STRENGTH_POINT_LOSS_MAP } from '../../common/constants';
 
 /**
  * Calculates the strength point gain for quest completion based on a streak value.
  * @param streak - The streak count to calculate gain from.
- * @returns The strength point gain, with a minimum of 5.
+ * @returns The strength point gain, with a maximum of 5.
  */
 export const calculateStrengthPointGain = (streak: number) => {
-  return Math.max(streak, 5);
+  return Math.min(streak, 5);
 };
 
 /**
@@ -15,13 +15,5 @@ export const calculateStrengthPointGain = (streak: number) => {
  * @returns The number of strength points to lose for the given level.
  */
 export const calculateStrengthPointLoss = (strengthLevel: StrengthLevel) => {
-  const lossMapping: Record<StrengthLevel, number> = {
-    E: 2,
-    D: 5,
-    C: 10,
-    B: 15,
-    A: 18,
-    S: 20,
-  };
-  return lossMapping[strengthLevel];
+  return STRENGTH_POINT_LOSS_MAP[strengthLevel];
 };
