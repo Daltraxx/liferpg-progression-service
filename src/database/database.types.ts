@@ -387,7 +387,6 @@ export type Database = {
           updated_at: string;
           username: string;
           usertag: string;
-          verified: boolean;
         };
         Insert: {
           created_at?: string;
@@ -402,7 +401,6 @@ export type Database = {
           updated_at?: string;
           username: string;
           usertag: string;
-          verified?: boolean;
         };
         Update: {
           created_at?: string;
@@ -417,7 +415,6 @@ export type Database = {
           updated_at?: string;
           username?: string;
           usertag?: string;
-          verified?: boolean;
         };
         Relationships: [];
       };
