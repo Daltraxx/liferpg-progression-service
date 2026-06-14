@@ -37,21 +37,21 @@ describe('levels.rule', () => {
 
     it('matches the inverse of calculateUserLevel at key boundaries', () => {
       expect(calculateExperienceForUserLevel(2)).toBe(USER_LEVEL_BASE_XP);
-      expect(calculateExperienceForUserLevel(3)).toBe(calculateExperienceForUserLevel(3));
-      expect(calculateExperienceForUserLevel(4)).toBe(calculateExperienceForUserLevel(4));
+      expect(calculateExperienceForUserLevel(3)).toBe(2400);
+      expect(calculateExperienceForUserLevel(4)).toBe(8100);
     });
   });
 
   describe('calculateAttributeLevel', () => {
     it('returns level 1 below the base experience threshold', () => {
       expect(calculateAttributeLevel(0)).toBe(1);
-      expect(calculateAttributeLevel(9)).toBe(1);
+      expect(calculateAttributeLevel(ATTRIBUTE_LEVEL_BASE_XP - 1)).toBe(1);
     });
 
     it('increases at the exact attribute level threshold boundaries', () => {
-      expect(calculateAttributeLevel(10)).toBe(2);
-      expect(calculateAttributeLevel(79)).toBe(2);
-      expect(calculateAttributeLevel(80)).toBe(3);
+      expect(calculateAttributeLevel(ATTRIBUTE_LEVEL_BASE_XP)).toBe(2);
+      expect(calculateAttributeLevel(calculateExperienceForAttributeLevel(3) - 1)).toBe(2);
+      expect(calculateAttributeLevel(calculateExperienceForAttributeLevel(3))).toBe(3);
     });
   });
 
@@ -69,15 +69,14 @@ describe('levels.rule', () => {
   });
 
   describe('calculateStrengthLevel', () => {
+    const { S, A, B, C, D, E } = STRENGTH_LEVEL_THRESHOLDS;
     it('returns E below the first threshold', () => {
       expect(calculateStrengthLevel(0)).toBe('E');
-      expect(calculateStrengthLevel(99)).toBe('E');
-    });
-
-    it('returns the expected strength level at each value', () => {
-      const { S, A, B, C, D, E } = STRENGTH_LEVEL_THRESHOLDS;
-      expect(calculateStrengthLevel(E)).toBe('E');
       expect(calculateStrengthLevel((E + D) / 2)).toBe('E');
+      expect(calculateStrengthLevel(E - 1)).toBe('E');
+    });
+    
+    it('returns the expected strength level at each value', () => {
       expect(calculateStrengthLevel(D)).toBe('D');
       expect(calculateStrengthLevel((D + C) / 2)).toBe('D');
       expect(calculateStrengthLevel(C)).toBe('C');
@@ -91,7 +90,7 @@ describe('levels.rule', () => {
     });
 
     it('returns the highest level for values above the top threshold', () => {
-      expect(calculateStrengthLevel(999)).toBe('S');
+      expect(calculateStrengthLevel(S + 1)).toBe('S');
     });
   });
 });
