@@ -236,10 +236,12 @@ export class UserProcessorService {
         if (isQuestOverdue) {
           let newStrengthLevel = strengthLevel;
           let newStrengthPoints = strengthPoints;
+          let newStreak = streak;
           if (restProgress < restFrequency) {
             // Apply penalties for missed completion
             const strengthPointLoss = calculateStrengthPointLoss(strengthLevel);
             newStrengthPoints = Math.max(strengthPoints - strengthPointLoss, 0);
+            newStreak = 0;
             processedUser.progressionLogs.push(
               createQuestStrengthProgressionLog(
                 processedUser.userId,
@@ -247,7 +249,7 @@ export class UserProcessorService {
                 questName,
                 -strengthPointLoss,
                 newStrengthPoints,
-                streak,
+                newStreak,
               ),
             );
             newStrengthLevel = calculateStrengthLevel(newStrengthPoints);
@@ -257,7 +259,7 @@ export class UserProcessorService {
             name: questName,
             strengthLevel: newStrengthLevel,
             strengthPoints: newStrengthPoints,
-            streak: 0,
+            streak: newStreak,
             restProgress: 0,
             lastCompletedDate: lastCompletedDate,
           };
