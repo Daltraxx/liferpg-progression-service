@@ -22,7 +22,7 @@ describe('UserProcessorService', () => {
   const activityDate = '2026-06-13';
 
   /**
-   * Factory function to build settlement test data that, 
+   * Factory function to build settlement test data that,
    * by default, includes a single user with one quest, one attribute, and one quest completion.
    *
    * Creates a default settlement data structure with a user, quests, attributes,
@@ -128,8 +128,11 @@ describe('UserProcessorService', () => {
     expect(processed.timezone).toBe('UTC');
 
     const expectedStreak = settlementData[0].quests[0].streak + 1;
-    const strengthPointGain = calculateStrengthPointGain(settlementData[0].quests[0].streak);
-    const expectedStrengthPoints = settlementData[0].quests[0].strength_points + strengthPointGain;
+    const strengthPointGain = calculateStrengthPointGain(
+      settlementData[0].quests[0].streak,
+    );
+    const expectedStrengthPoints =
+      settlementData[0].quests[0].strength_points + strengthPointGain;
 
     expect(processed.quests).toEqual([
       expect.objectContaining({
@@ -141,11 +144,15 @@ describe('UserProcessorService', () => {
       }),
     ]);
 
+    const attributeExperienceGain = settlementData[0].quests_attributes[0].attribute_power;
+    const expectedAttributeExperience =
+      settlementData[0].attributes[0].experience + attributeExperienceGain;
+
     expect(processed.attributes).toEqual([
       expect.objectContaining({
         attributeId: 10,
-        experience: 22,
-        level: calculateAttributeLevel(22),
+        experience: expectedAttributeExperience,
+        level: calculateAttributeLevel(expectedAttributeExperience),
       }),
     ]);
 
