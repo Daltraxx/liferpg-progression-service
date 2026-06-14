@@ -193,7 +193,6 @@ export type Database = {
           id: number;
           processed_at: string | null;
           quest_id: number;
-          streak: number;
           updated_at: string | null;
           user_id: string;
         };
@@ -203,7 +202,6 @@ export type Database = {
           id?: number;
           processed_at?: string | null;
           quest_id: number;
-          streak?: number;
           updated_at?: string | null;
           user_id: string;
         };
@@ -213,7 +211,6 @@ export type Database = {
           id?: number;
           processed_at?: string | null;
           quest_id?: number;
-          streak?: number;
           updated_at?: string | null;
           user_id?: string;
         };
