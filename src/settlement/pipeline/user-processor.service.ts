@@ -88,7 +88,7 @@ export class UserProcessorService {
     // Create a map of quest completions for easy lookup
     const questCompletions = new Map<number, SettlementQuestCompletionData>();
     userData.quest_completions.forEach((qc) => {
-      questCompletions.set(qc.id, qc);
+      questCompletions.set(qc.quest_id, qc);
       processedUser.processedQuestCompletionIds.push(qc.id);
     });
 
