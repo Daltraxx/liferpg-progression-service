@@ -115,7 +115,6 @@ describe('UserProcessorService', () => {
 
   it('processes completed quests and updates user, attribute, and quest state', () => {
     const settlementData = buildSettlementData();
-    const initialUserLevel = settlementData[0].user.level;
     const initialUserExperience = settlementData[0].user.experience;
     const quest = settlementData[0].quests[0];
     const questCompletion = settlementData[0].quest_completions[0];
@@ -136,7 +135,7 @@ describe('UserProcessorService', () => {
     expect(processed.timezone).toBe('UTC');
 
     const expectedStreak = quest.streak + 1;
-    const expectedStrengthPointGain = calculateStrengthPointGain(quest.streak);
+    const expectedStrengthPointGain = calculateStrengthPointGain(expectedStreak);
     const expectedStrengthPoints =
       quest.strength_points + expectedStrengthPointGain;
 
