@@ -43,7 +43,7 @@ describe('UserProcessorService', () => {
       },
       quests: [
         {
-          id: 1,
+          id: 4,
           name: 'Morning Run',
           strength_level: 'E',
           strength_points: 10,
@@ -64,15 +64,15 @@ describe('UserProcessorService', () => {
       ],
       quests_attributes: [
         {
-          quest_id: 1,
+          quest_id: 4,
           attribute_id: 10,
           attribute_power: 2,
         },
       ],
       quest_completions: [
         {
-          id: 1,
-          quest_id: 1,
+          id: 26,
+          quest_id: 4,
           experience_earned: 25,
           processed_at: null,
           completed_at: '2026-06-13T00:00:00.000Z',
@@ -115,28 +115,34 @@ describe('UserProcessorService', () => {
 
   it('processes completed quests and updates user, attribute, and quest state', () => {
     const settlementData = buildSettlementData();
+    const initialUserLevel = settlementData[0].user.level;
+    const initialUserExperience = settlementData[0].user.experience;
+    const quest = settlementData[0].quests[0];
+    const questCompletion = settlementData[0].quest_completions[0];
 
     const result = service.processUsers(settlementData, activityDate);
+    const expectedUserExperience =
+      initialUserExperience + questCompletion.experience_earned;
+    const expectedUserLevel = calculateUserLevel(expectedUserExperience);
+    const expectedProcessedQuestCompletionIds = [questCompletion.id];
 
     expect(result).toHaveLength(1);
 
     const processed = result[0];
     expect(processed.userId).toBe(settlementData[0].user.id);
-    expect(processed.experience).toBe(125);
-    expect(processed.level).toBe(calculateUserLevel(125));
-    expect(processed.processedQuestCompletionIds).toEqual([1]);
+    expect(processed.experience).toBe(expectedUserExperience);
+    expect(processed.level).toBe(expectedUserLevel);
+    expect(processed.processedQuestCompletionIds).toEqual(expectedProcessedQuestCompletionIds);
     expect(processed.timezone).toBe('UTC');
 
-    const expectedStreak = settlementData[0].quests[0].streak + 1;
-    const strengthPointGain = calculateStrengthPointGain(
-      settlementData[0].quests[0].streak,
-    );
+    const expectedStreak = quest.streak + 1;
+    const expectedStrengthPointGain = calculateStrengthPointGain(quest.streak);
     const expectedStrengthPoints =
-      settlementData[0].quests[0].strength_points + strengthPointGain;
+      quest.strength_points + expectedStrengthPointGain;
 
     expect(processed.quests).toEqual([
       expect.objectContaining({
-        questId: 1,
+        questId: 4,
         strengthPoints: expectedStrengthPoints,
         streak: expectedStreak,
         restProgress: 1,
@@ -170,7 +176,7 @@ describe('UserProcessorService', () => {
       quest_completions: [],
       quests: [
         {
-          id: 1,
+          id: 4,
           name: 'Morning Run',
           strength_level: 'E',
           strength_points: 10,
@@ -219,7 +225,7 @@ describe('UserProcessorService', () => {
       quest_completions: [],
       quests: [
         {
-          id: 1,
+          id: 4,
           name: 'Morning Run',
           strength_level: 'E',
           strength_points: 1,
@@ -270,7 +276,7 @@ describe('UserProcessorService', () => {
       quest_completions: [],
       quests: [
         {
-          id: 1,
+          id: 4,
           name: 'Morning Run',
           strength_level: 'D',
           strength_points: 10,
@@ -309,7 +315,7 @@ describe('UserProcessorService', () => {
       quest_completions: [],
       quests: [
         {
-          id: 1,
+          id: 4,
           name: 'Morning Run',
           strength_level: 'D',
           strength_points: 10,
@@ -335,7 +341,7 @@ describe('UserProcessorService', () => {
     });
 
     expect(() => service.processUsers(settlementData, activityDate)).toThrow(
-      'Completed quest 1 (Morning Run) has no associated attributes',
+      'Completed quest 4 (Morning Run) has no associated attributes',
     );
   });
 
@@ -343,7 +349,7 @@ describe('UserProcessorService', () => {
     const settlementData = buildSettlementData({
       quests_attributes: [
         {
-          quest_id: 1,
+          quest_id: 4,
           attribute_id: 999,
           attribute_power: 2,
         },
@@ -351,7 +357,7 @@ describe('UserProcessorService', () => {
     });
 
     expect(() => service.processUsers(settlementData, activityDate)).toThrow(
-      'Attribute 999 not found for quest 1 (Morning Run)',
+      'Attribute 999 not found for quest 4 (Morning Run)',
     );
   });
 });
