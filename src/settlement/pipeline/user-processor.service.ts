@@ -85,14 +85,14 @@ export class UserProcessorService {
     };
 
     // PROCESS USER
-    // Create a map of quest completions for easy lookup
+    // Create a map of quest completions for easy lookup by quest ID
     const questCompletions = new Map<number, SettlementQuestCompletionData>();
     userData.quest_completions.forEach((qc) => {
       questCompletions.set(qc.quest_id, qc);
       processedUser.processedQuestCompletionIds.push(qc.id);
     });
 
-    // Create a map of attributes for easy lookup and updating
+    // Create a map of attributes for easy lookup and updating by attribute ID
     const attributeMap = new Map<number, ProcessedAttributeData>();
     userData.attributes.forEach((attribute) => {
       const processedAttribute: ProcessedAttributeData = {
@@ -104,7 +104,8 @@ export class UserProcessorService {
       attributeMap.set(attribute.id, processedAttribute);
     });
 
-    // Create a map of quest-attribute relationships for easy lookup
+    // Create a map of quest-attribute relationships for easy lookup by quest ID 
+    // to determine which attributes are affected by each quest
     const affectedAttributeMap = new Map<
       number,
       { attributeId: number; attributePower: number }[]
