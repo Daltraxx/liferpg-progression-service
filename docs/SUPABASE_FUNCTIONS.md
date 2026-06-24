@@ -1,305 +1,38 @@
-## Database Overview
+# Functions and Triggers Reference
 
-### Tables
+## Handle New User Signup (Trigger)
 
-Full table can be found on the Supabase dashboard.
-
-**strength_levels**: Lookup table for strength rank multipliers (E-S)
-
-- `level`: strength_rank PRIMARY KEY
-  - Strength rank enum (E, D, C, B, A, S)
-- `multiplier`: DECIMAL(4, 2) NOT NULL
-  - Multiplier for experience calculation
-- `min_points`: INT NOT NULL
-  - Minimum strength points required for this rank
-- `max_points`: INT
-  - Maximum strength points for this rank (null for S)
-- `updated_at`: TIMESTAMPTZ DEFAULT NOW()
-  - Timestamp of last update
-
-**users**: Core user accounts with level and experience tracking
-
-- Note: This is separate from the Supabase auth.users table, which handles authentication.
-- The users table in our schema is for application-specific user data and links to auth.users via the id field.
-
-- RLS Policies:
-  - Users can only SELECT, UPDATE, DELETE their own record (WHERE id = auth.uid())
-  - Anon users only have access to reading the usertag field for uniqueness checks during account creation (SELECT usertag WHERE usertag = $1)
-
-- `id`: UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE
-  - User identifier linked to authentication
-- `username`: VARCHAR(50) NOT NULL
-  - Username (max 50 chars)
-- `usertag`: VARCHAR(50) UNIQUE NOT NULL
-  - Unique usertag for potential social features
-- `email`: VARCHAR(255) UNIQUE NOT NULL
-  - User email address
-- `purpose`: VARCHAR(500)
-  - Optional user-defined purpose statement (max 500 chars)
-- `timezone`: TEXT NOT NULL DEFAULT 'UTC'
-  - User's timezone for scheduling and timestamps
-- `created_at`: TIMESTAMPTZ DEFAULT NOW()
-  - Account creation timestamp
-- `last_login`: TIMESTAMPTZ
-  - Last login timestamp
-- `profile_complete`: BOOLEAN DEFAULT FALSE NOT NULL
-  - Whether user has defined their quests and attributes
-- `level`: INT DEFAULT 1 NOT NULL
-  - Overall player level
-- `experience`: INT NOT NULL DEFAULT 0
-  - Total experience points
-- `updated_at`: TIMESTAMPTZ DEFAULT NOW() NOT NULL
-  - Timestamp of last update
-
-**users indexes**:
-
-- `idx_users_usertag` ON (usertag)
-  - Fast lookups by usertag for uniqueness checks
-- `idx_users_timezone` ON (timezone)
-  - Fast lookups by timezone for batch processing
-
-**attributes**: Player-defined attributes that level independently
-
-- `id`: SERIAL PRIMARY KEY
-  - Unique attribute identifier
-- `user_id`: UUID REFERENCES users(id) ON DELETE CASCADE NOT NULL
-  - Owner of the attribute
-- `name`: VARCHAR(50) NOT NULL
-  - Attribute name (max 50 chars, unique per user)
-- `level`: INT DEFAULT 1 NOT NULL
-  - Current attribute level
-- `experience`: INT NOT NULL DEFAULT 0
-  - Attribute experience points
-- `position`: INT NOT NULL CHECK (position >= 0)
-  - Display order for attribute list (unique per user)
-  - Position is zero-indexed and handled before insertion in application logic
-- `created_at`: TIMESTAMPTZ DEFAULT NOW() NOT NULL
-  - Creation timestamp
-- `updated_at`: TIMESTAMPTZ DEFAULT NOW() NOT NULL
-  - Timestamp of last update
-- UNIQUE (user_id, name)
-  - Ensures attribute names are unique per user
-- UNIQUE (user_id, position)
-  - Ensures each user has unique attribute ordering
-
-**attributes indexes**:
-
-- `idx_attributes_user_id` ON (user_id)
-  - Fast lookups by user
-
-**quests**: Quests assigned by users with frequency, streak, and strength mechanics
-
-- `id`: SERIAL PRIMARY KEY
-  - Unique quest identifier
-- `user_id`: UUID REFERENCES users(id) ON DELETE CASCADE NOT NULL
-  - Owner of the quest
-- `name`: VARCHAR(200) NOT NULL
-  - Quest name (max 200 chars)
-- `description`: TEXT
-  - Optional quest description
-- `created_at`: TIMESTAMPTZ DEFAULT NOW() NOT NULL
-  - Creation timestamp
-- `frequency`: INT NOT NULL DEFAULT 1 CHECK (frequency >= 0)
-  - Interval in days between required completions (1 = daily, 7 = weekly, etc.)
-- `rest_frequency`: INT NOT NULL DEFAULT 0 CHECK (rest_frequency >= 0)
-  - Allowed rest days without streak reset
-- `rest_progress`: INT NOT NULL DEFAULT 0
-  - Represents progress towards next rest day where not completing required quest does not result in penalties
-- `experience_share`: INT NOT NULL CHECK (experience_share BETWEEN 0 AND 100)
-  - Amount (0–100) of daily experience points allocated to this quest as determined by the user
-- `streak`: INT NOT NULL DEFAULT 0
-  - Current streak count
-- `strength_points`: INT NOT NULL DEFAULT 0
-  - Accumulated strength points
-- `strength_level`: strength_rank REFERENCES strength_levels(level) NOT NULL DEFAULT 'E'
-  - Current strength rank (E-S)
-- `last_completed_date`: DATE
-  - Activity date of last completion (the date the completion belongs to, even if completed after midnight but before the user's daily boundary)
-- `position`: INT NOT NULL CHECK (position >= 0)
-  - Display order for quest list (unique per user)
-  - Position is zero-indexed and handled before insertion
-- `updated_at`: TIMESTAMPTZ DEFAULT NOW() NOT NULL
-  - Timestamp of last update
-- UNIQUE (user_id, position)
-  - Ensures each user has unique quest ordering
-- UNIQUE (user_id, name)
-  - Ensures quest names are unique per user
-
-**quests indexes**:
-
-- `idx_quests_user_id` ON (user_id)
-  - Fast lookups by user
-
-**quest_completions**: Records each quest completion with streak and experience earned
-
-- `id`: SERIAL PRIMARY KEY
-  - Unique completion record identifier
-- `quest_id`: INT REFERENCES quests(id) ON DELETE CASCADE NOT NULL
-  - Reference to completed quest
-- `user_id`: UUID REFERENCES users(id) ON DELETE CASCADE NOT NULL
-  - User who completed the quest
-- `completed_at`: TIMESTAMPTZ DEFAULT NOW() NOT NULL
-  - Completion timestamp
-- `processed_at`: TIMESTAMPTZ
-  - Timestamp when this completion was processed for experience and streak updates
-- `experience_earned`: INT DEFAULT 0 NOT NULL
-  - Experience points awarded
-- `updated_at`: TIMESTAMPTZ DEFAULT NOW() NOT NULL
-  - Timestamp of last update
-
-**quest_completions indexes**:
-
-- `idx_quest_completions_quest_id` ON (quest_id)
-  - Fast lookups by quest
-- `idx_quest_completions_completed_at` ON (completed_at)
-  - Fast lookups by completion date
-- `idx_quest_completions_user_unprocessed` ON (user_id) WHERE processed_at IS NULL
-  - Fast lookups for unprocessed completions by user
-
-**quests_attributes**: Junction table linking quests to attributes with power multipliers
-
-- `id`: SERIAL PRIMARY KEY
-  - Unique junction record identifier
-- `user_id`: UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE
-  - Owner of the quest-attribute relationship
-- `quest_id`: INT NOT NULL REFERENCES quests(id) ON DELETE CASCADE
-  - Reference to quest
-- `attribute_id`: INT NOT NULL REFERENCES attributes(id) ON DELETE CASCADE
-  - Reference to attribute
-- `attribute_power`: INT DEFAULT 1 NOT NULL
-  - Power multiplier for this attribute
-- `updated_at`: TIMESTAMPTZ DEFAULT NOW() NOT NULL
-  - Timestamp of last update
-- UNIQUE (quest_id, attribute_id)
-  - Ensures each quest-attribute pair is unique
-
-**quests_attributes indexes**:
-
-- `idx_quests_attributes_user_id` ON (user_id)
-  - Fast lookups by user
-- `idx_quests_attributes_quest_id` ON (quest_id)
-  - Fast lookups by quest
-- `idx_quests_attributes_attribute_id` ON (attribute_id)
-  - Fast lookups by attribute
-
-**progression_logs**: Audit trail of all experience transactions from daily settlement pipeline
-
-- Notes on insertions:
-  - Each record represents a single experience change event, whether from quest completion, level up, or attribute progression
-  - target indicates where the points are applied (users(experience), quests(quest_strength_points), or attributes(experience))
-  - user_id is always required to link the transaction to a user, but attribute_id may be null if the transaction is not related to a specific attribute
-  - quest_id is always required upon insert due to all experience being the result of quest completions
-  - quest_id is only nullable in case the quest is deleted in the future, but quest_name is stored for reference.
-  - attribute_id is required if target is attribute, but must otherwise be null.
-  - attribute_name, like quest_name, is stored for reference in case the related attribute is deleted in the future,
-    but is not required upon insertion if attribute_id is null.
-  - When inserting records:
-    - If inserting with target of user, quest_id must be provided (users earn experience from quests) and attribute_id must be null
-    - If inserting with target of attribute, all ids (user_id, quest_id, attribute_id) must be provided
-    - If inserting with target of quest_strength, user_id and quest_id must be provided, but attribute_id must be null
-      (quest strength progression is not related to a specific attribute)
-    - TODO: Document rules on format for for reason field
-      (e.g. "Completed quest: {quest_name} with streak {streak}", "Leveled up attribute: {attribute_name} due to completion of {quest_name}",
-      "Completed quest: {quest_name} and earned {points} + {bonus_points} from strength level {strength_level}")
-
-- `id`: SERIAL PRIMARY KEY
-  - Unique log entry identifier
-- `target`: TEXT NOT NULL CHECK (target IN ('user', 'quest_strength', 'attribute'))
-  - What the experience change applies to (overall user, quest strength, or attribute)
-- `reason`: TEXT NOT NULL
-  - Description of transaction
-- `user_id`: UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE
-  - User who earned/lost experience
-- `quest_id`: INT REFERENCES quests(id) ON DELETE SET NULL
-  - Related quest (nullable)
-- `quest_name`: TEXT
-  - Name of related quest (nullable, paired with quest_id via CHECK constraint)
-- `attribute_id`: INT REFERENCES attributes(id) ON DELETE SET NULL
-  - Related attribute (nullable)
-- `attribute_name`: TEXT
-  - Name of related attribute (nullable, paired with attribute_id via CHECK constraint)
-- `points`: INT NOT NULL
-  - Points in transaction
-- `daily_batch_id`: INT NOT NULL REFERENCES daily_progression_batches(id) ON DELETE CASCADE
-  - Reference to daily batch for this transaction
-- `created_at`: TIMESTAMPTZ NOT NULL DEFAULT NOW()
-  - Transaction timestamp
-- CHECK constraint: (quest_id IS NULL OR quest_name IS NOT NULL) AND (attribute_id IS NULL OR attribute_name IS NOT NULL)
-  - Ensures quest_name exists when quest_id is set, and attribute_name exists when attribute_id is set
-
-**progression_logs Indexes**:
-
-- `idx_progression_logs_user_id` ON (user_id)
-  - Fast lookups by user
-- `idx_progression_logs_created_at` ON (created_at)
-  - Fast lookups by timestamp
-- `idx_progression_logs_user_created_at` ON (user_id, created_at)
-  - Fast lookups by user and timestamp range
-
-**daily_progression_batches**: Tracks execution of daily progression batch job for auditing and debugging
-
-- `id`: SERIAL PRIMARY KEY
-  - Unique batch record identifier
-- `user_id`: UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE
-  - User associated with the batch
-- `processed_at`: TIMESTAMPTZ NOT NULL
-  - Timestamp when batch was processed
-- `activity_date`: DATE NOT NULL
-  - Date for which daily progression was calculated
-- `user_timezone`: TEXT NOT NULL
-  - User's timezone used for daily boundary calculation
-- `created_at`: TIMESTAMPTZ NOT NULL DEFAULT NOW()
-  - Record creation timestamp
-- UNIQUE (user_id, activity_date)
-  - Ensures only one batch per user per day
-
-**daily_progression_batches Indexes**:
-
-- `idx_daily_progression_batches_user_id` ON (user_id)
-  - Fast lookups by user
-- `idx_daily_progression_batches_activity_date` ON (activity_date)
-  - Fast lookups by activity date
-- `idx_daily_progression_batches_user_activity_date` ON (user_id, activity_date)
-  - Fast lookups by user and activity date
-
-### Key Features
-
-- Strength rank system (E-S) applies experience multipliers to quest rewards
-- Frequency and rest_frequency fields support flexible habit scheduling
-- Experience shared across user level, individual attributes, and quest streaks
-- Cascading deletes maintain referential integrity when users or quests are removed
-- Trigger upon insertion to Supabase auth.users that inserts user to project users table
-- Function to create user profile with attributes and quests in single atomic transaction
-
-### Strength Levels Reference (from setup)
-
-INSERT INTO strength_levels (level, multiplier, min_points, max_points) VALUES
-('E', 0, 0, 99),
-('D', 0.20, 100, 199),
-('C', 0.40, 200, 299),
-('B', 0.60, 300, 399),
-('A', 0.80, 400, 499),
-('S', 1.00, 500, NULL);
-
----------------------------------------------------------------------------------------
-
-## Functions and Triggers Reference
-
-### Handle New User Signup (Trigger)
--- This trigger function listens for new user insertions into the auth.users table (handled by Supabase authentication) 
--- and creates a corresponding record in our application-specific users table. 
--- It extracts the email, username, and usertag from the raw_user_meta_data JSON field provided by Supabase during signup. 
--- This ensures that every authenticated user has a corresponding profile in our users table, 
+-- This trigger function listens for new user insertions into the auth.users table (handled by Supabase authentication)
+-- and creates a corresponding record in our application-specific users table.
+-- It extracts the email, username, and usertag from the raw_user_meta_data JSON field provided by Supabase during signup.
+-- This ensures that every authenticated user has a corresponding profile in our users table,
 -- which is necessary for linking quests, attributes, and progression data.
+-- Note that metadata fields must be validated before insertion, as the trigger assumes they are correctly formatted if present.
 
 ```sql
 -- Trigger Function
 CREATE OR REPLACE FUNCTION public.handle_new_user_signup()
 RETURNS TRIGGER AS
 $$
+DECLARE
+  v_username TEXT := NEW.raw_user_meta_data ->> 'username';
+  v_usertag TEXT := NEW.raw_user_meta_data ->> 'usertag';
+  v_timezone TEXT := NEW.raw_user_meta_data ->> 'timezone';
 BEGIN
-  INSERT INTO public.users (id, email, username, usertag)
-  VALUES (NEW.id, NEW.email, NEW.raw_user_meta_data ->> 'username', NEW.raw_user_meta_data ->> 'usertag');
+  IF v_username IS NULL OR btrim(v_username) = '' THEN
+    RAISE EXCEPTION 'Signup metadata missing required field: username';
+  END IF;
+
+  IF v_usertag IS NULL OR btrim(v_usertag) = '' THEN
+    RAISE EXCEPTION 'Signup metadata missing required field: usertag';
+  END IF;
+
+  IF v_timezone IS NULL OR btrim(v_timezone) = '' THEN
+    RAISE EXCEPTION 'Signup metadata missing required field: timezone';
+  END IF;
+
+  INSERT INTO public.users (id, email, username, usertag, timezone)
+  VALUES (NEW.id, NEW.email, v_username, v_usertag, v_timezone);
   RETURN NEW;
 END;
 $$
@@ -311,9 +44,9 @@ AFTER INSERT ON auth.users
 FOR EACH ROW EXECUTE FUNCTION public.handle_new_user_signup();
 ```
 
-### Atomic Profile Creation Function
+## Atomic Profile Creation Function
 
-#### Example Call
+### Example Call
 
 ```typescript
 // Prepare data for insertion
@@ -356,7 +89,9 @@ const { error } = await supabase.rpc("create_profile_transaction", {
 });
 ```
 
-### Create Profile Transaction Function
+---
+
+## Create Profile Transaction Function
 
 -- Defines function that takes user_id, array of attribute objects,
 -- array of quest objects, and array of quests_attributes
@@ -463,11 +198,15 @@ END;
 $$;
 ```
 
+---
+
 ### Get Settlement Data Function
+
 -- Function to fetch all necessary data for settlement pipeline in a single call
 -- Takes array of timezone strings to filter users for batch processing and optimize data retrieval
 -- Returns JSON with users, quests, attributes, quests_attributes, and quest_completions for relevant users
 -- This function is intended to reduce the number of round trips between the application and database during the daily settlement batch job, improving performance and efficiency. By filtering users based on timezone, we can ensure that we are only retrieving data for users who are due for settlement processing, which is determined by their local date and time. This function should be called at the beginning of the batch job to gather all necessary data before performing calculations and updates.
+
 ```sql
 create or replace function public.get_settlement_users_data(
   p_timezones text[]
@@ -558,14 +297,17 @@ as $$
 $$;
 ```
 
-### Commit Progression Function
+---
+
+## Commit Progression Function
+
 -- Function to commit user progression updates to the database in a transaction
 -- Takes processed progression data for a user and the activity date for which the progression is being committed
 -- This function is intended to be called for each user during the daily settlement batch job after calculations have been performed based on the data retrieved from get_settlement_users_data. It will handle all necessary updates to the users, quests, attributes, and progression_logs tables in a single transaction to ensure data integrity. The function also includes validation of the input data and error handling to catch any issues during the update process.
 -- Safe to call multiple times for the same user and activity date due to the unique constraint on daily_progression_batches, which prevents duplicate processing and allows for idempotent retries in case of failures.
 -- Service role permissions are required to execute this function and its helper function due to the need for updating multiple tables and ensuring proper access control.
 
-``` sql
+```sql
 -- Define a function to commit user progression updates to the database in a transaction
 CREATE OR REPLACE FUNCTION public.commit_progression(p_processed_progression_data JSONB, p_activity_date DATE)
 RETURNS void
@@ -628,16 +370,16 @@ BEGIN
     END IF;
 
     -- Update the user's overall experience and level in the users table
-    DECLARE 
+    DECLARE
         v_rows_updated INTEGER;
     BEGIN
         UPDATE users
-        SET 
+        SET
             experience = v_user_experience,
             level = v_user_level,
             updated_at = NOW()
         WHERE id = v_user_id;
-          
+
         GET DIAGNOSTICS v_rows_updated = ROW_COUNT;
         IF v_rows_updated <> 1 THEN
             RAISE EXCEPTION 'Expected to update 1 user, updated % for user %', v_rows_updated, v_user_id;
@@ -671,7 +413,7 @@ BEGIN
             )
         )
         UPDATE quests q
-        SET 
+        SET
             strength_level = qu."strengthLevel",
             strength_points = qu."strengthPoints",
             rest_progress = qu."restProgress",
@@ -708,7 +450,7 @@ BEGIN
         )
     )
         UPDATE attributes a
-        SET 
+        SET
             level = au."level",
             experience = au."experience",
             updated_at = NOW()
@@ -749,7 +491,7 @@ BEGIN
             reason,
             created_at
         )
-        SELECT 
+        SELECT
             v_daily_batch_id,
             v_user_id,
             l."target",
@@ -769,7 +511,7 @@ BEGIN
             "points" INTEGER,
             "reason" TEXT
         );
-      
+
         GET DIAGNOSTICS v_actual_log_inserts = ROW_COUNT;
         IF v_actual_log_inserts <> v_expected_log_inserts THEN
             RAISE EXCEPTION 'Expected to insert % progression logs, but inserted % for user %', v_expected_log_inserts, v_actual_log_inserts, v_user_id;
@@ -794,15 +536,293 @@ BEGIN
             processed_at = v_processed_at,
             updated_at = NOW()
         FROM completion_ids
-        WHERE qc.user_id = v_user_id 
+        WHERE qc.user_id = v_user_id
             AND qc.processed_at IS NULL
             AND qc.id = completion_ids.id;
-        
+
         GET DIAGNOSTICS v_actual_completions_updated = ROW_COUNT;
         IF v_actual_completions_updated <> v_expected_completions_updated THEN
             RAISE EXCEPTION 'Expected to update % quest completions, but updated % for user %', v_expected_completions_updated, v_actual_completions_updated, v_user_id;
         END IF;
     END;
+END;
+$$;
+```
+
+## Edit Profile Transaction Function
+
+-- This function performs the entire profile update process within a single transaction.
+-- It takes the user ID and arrays of quests, attributes, and quest-attribute relationships to be inserted, updated, or deleted.
+-- It uses a map of client keys to new IDs for quests and attributes to handle the insertion of new records
+-- and the creation of relationships in the quests_attributes table when there is not a pre-existing attribute or quest ID.
+-- The function ensures that all operations are performed atomically, so if any part of the process fails, the entire transaction will be rolled back to maintain data integrity.
+-- The function also includes security checks to ensure that users can only modify their own profiles, and it validates the input data to prevent issues during the update process.
+-- TODO: Make all parameters required and remove defaults, as this function should be called with all necessary data for a complete profile update.
+
+```sql
+CREATE OR REPLACE FUNCTION public.edit_profile_transaction(
+    p_user_id UUID,
+    p_quests_inserts JSONB DEFAULT '[]'::JSONB,
+    p_quests_updates JSONB DEFAULT '[]'::JSONB,
+    p_quests_deletes JSONB DEFAULT '[]'::JSONB,
+    p_attributes_inserts JSONB DEFAULT '[]'::JSONB,
+    p_attributes_updates JSONB DEFAULT '[]'::JSONB,
+    p_attributes_deletes JSONB DEFAULT '[]'::JSONB,
+    p_quests_attributes_inserts JSONB DEFAULT '[]'::JSONB,
+    p_quests_attributes_updates JSONB DEFAULT '[]'::JSONB,
+    p_quests_attributes_deletes JSONB DEFAULT '[]'::JSONB
+)
+
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+    v_q RECORD;
+    v_a RECORD;
+    v_qa RECORD;
+
+    v_new_id INT;
+    v_resolved_quest_id INT;
+    v_resolved_attribute_id INT;
+
+    v_quest_id_map JSONB := '{}'::JSONB; -- Map of client keys to new quest IDs
+    v_attribute_id_map JSONB := '{}'::JSONB; -- Map of client keys to new attribute IDs
+
+    v_result JSONB;
+BEGIN
+    -- SECURITY CHECK: Ensure the authenticated user can only modify their own data
+    IF p_user_id IS NULL OR p_user_id <> auth.uid() THEN
+      RAISE EXCEPTION 'Unauthorized: User ID mismatch'
+        USING ERRCODE = '42501';
+    END IF;
+
+    -- Validate inputs are not NULL
+    IF p_quests_inserts IS NULL OR p_quests_updates IS NULL OR
+    p_attributes_inserts IS NULL OR p_attributes_updates IS NULL OR
+    p_quests_attributes_inserts IS NULL OR p_quests_attributes_updates IS NULL OR
+    p_quests_deletes IS NULL OR p_attributes_deletes IS NULL OR p_quests_attributes_deletes IS NULL THEN
+      RAISE EXCEPTION 'Input parameters cannot be NULL';
+    END IF;
+
+    -- Lock the user row to prevent concurrent modifications and ensure the user exists
+    PERFORM 1
+    FROM public.users
+    WHERE id = p_user_id
+    FOR UPDATE; -- Lock the user row to prevent concurrent modifications
+
+    IF NOT FOUND THEN
+      RAISE EXCEPTION 'User not found'
+        USING ERRCODE = 'P0002';
+    END IF;
+
+    -- Defer unique constraint checks to allow for reordering and updates within the transaction
+    SET CONSTRAINTS uq_quests_user_id_position DEFERRED;
+    SET CONSTRAINTS uq_attributes_user_id_position DEFERRED;
+
+    -- 1. Delete targeted quest-attribute relationships first to avoid foreign key conflicts
+    FOR v_qa IN
+        SELECT * FROM jsonb_to_recordset(coalesce(p_quests_attributes_deletes, '[]'::JSONB))
+        AS x(id INT)
+    LOOP
+        DELETE FROM public.quests_attributes
+        WHERE id = v_qa.id
+        AND user_id = p_user_id;
+
+        IF NOT FOUND THEN
+          RAISE EXCEPTION 'Quest-attribute relationship % not found for user %',
+            v_qa.id, p_user_id;
+        END IF;
+    END LOOP;
+
+    -- 2. Delete quests. This cascades to quests_attributes due to the foreign key constraint.
+    FOR v_q IN
+        SELECT * FROM jsonb_to_recordset(coalesce(p_quests_deletes, '[]'::JSONB))
+        AS x(id INT)
+    LOOP
+        DELETE FROM public.quests
+        WHERE id = v_q.id
+        AND user_id = p_user_id;
+
+        IF NOT FOUND THEN
+          RAISE EXCEPTION 'Quest % not found for user %',
+            v_q.id, p_user_id;
+        END IF;
+    END LOOP;
+
+    -- 3. Delete attributes. This cascades to quests_attributes due to the foreign key constraint.
+    FOR v_a IN
+        SELECT * FROM jsonb_to_recordset(coalesce(p_attributes_deletes, '[]'::JSONB))
+        AS x(id INT)
+    LOOP
+        DELETE FROM public.attributes
+        WHERE id = v_a.id
+        AND user_id = p_user_id;
+
+        IF NOT FOUND THEN
+          RAISE EXCEPTION 'Attribute % not found for user %',
+            v_a.id, p_user_id;
+        END IF;
+    END LOOP;
+
+    -- 4. Update existing quests
+    FOR v_q IN
+        SELECT * FROM jsonb_to_recordset(coalesce(p_quests_updates, '[]'::JSONB))
+        AS x(
+          id INT, name TEXT, description TEXT, experience_share INT, frequency INT,
+          rest_frequency INT, position INT
+        )
+    LOOP
+        UPDATE public.quests
+        SET name = v_q.name,
+            description = v_q.description,
+            experience_share = v_q.experience_share,
+            frequency = v_q.frequency,
+            rest_frequency = v_q.rest_frequency,
+            position = v_q.position,
+            updated_at = NOW()
+        WHERE id = v_q.id
+        AND user_id = p_user_id;
+
+        IF NOT FOUND THEN
+          RAISE EXCEPTION 'Quest % not found for user %',
+            v_q.id, p_user_id;
+        END IF;
+    END LOOP;
+
+    -- 5. Insert new quests and build the quest ID map
+    FOR v_q IN
+        SELECT * FROM jsonb_to_recordset(coalesce(p_quests_inserts, '[]'::JSONB))
+        AS x(
+          client_key TEXT, name TEXT, description TEXT, experience_share INT, frequency INT,
+          rest_frequency INT, position INT
+        )
+    LOOP
+        INSERT INTO public.quests (
+          user_id, name, description, experience_share, frequency, rest_frequency, position
+        ) VALUES (
+          p_user_id, v_q.name, v_q.description, v_q.experience_share, v_q.frequency, v_q.rest_frequency, v_q.position
+        )
+        RETURNING id INTO v_new_id;
+
+        -- Update the quest ID map with the new ID
+        v_quest_id_map := v_quest_id_map || jsonb_build_object(v_q.client_key, v_new_id);
+    END LOOP;
+
+    -- 6. Update existing attributes
+    FOR v_a IN
+        SELECT * FROM jsonb_to_recordset(coalesce(p_attributes_updates, '[]'::JSONB))
+        AS x(id INT, name TEXT, position INT)
+    LOOP
+        UPDATE public.attributes
+        SET name = v_a.name,
+            position = v_a.position,
+            updated_at = NOW()
+        WHERE id = v_a.id
+        AND user_id = p_user_id;
+
+        IF NOT FOUND THEN
+          RAISE EXCEPTION 'Attribute % not found for user %',
+            v_a.id, p_user_id;
+        END IF;
+    END LOOP;
+
+    -- 7. Insert new attributes and build the attribute ID map
+    FOR v_a IN
+        SELECT * FROM jsonb_to_recordset(coalesce(p_attributes_inserts, '[]'::JSONB))
+        AS x(client_key TEXT, name TEXT, position INT)
+    LOOP
+        INSERT INTO public.attributes (
+          user_id, name, position
+        ) VALUES (
+          p_user_id, v_a.name, v_a.position
+        )
+        RETURNING id INTO v_new_id;
+
+        -- Update the attribute ID map with the new ID
+        v_attribute_id_map := v_attribute_id_map || jsonb_build_object(v_a.client_key, v_new_id);
+    END LOOP;
+
+    -- 8. Update quest-attribute relationships
+    FOR v_qa IN
+        SELECT * FROM jsonb_to_recordset(coalesce(p_quests_attributes_updates, '[]'::JSONB))
+        AS x(id INT, quest_id INT, attribute_id INT, attribute_power INT)
+    LOOP
+        UPDATE public.quests_attributes
+        SET attribute_power = v_qa.attribute_power,
+            updated_at = NOW()
+        WHERE id = v_qa.id
+          AND user_id = p_user_id
+          AND quest_id = v_qa.quest_id
+          AND attribute_id = v_qa.attribute_id;
+
+        IF NOT FOUND THEN
+          RAISE EXCEPTION 'Quest-attribute relationship % not found for user %',
+            v_qa.id, p_user_id;
+        END IF;
+    END LOOP;
+
+    -- 9. Insert new quest-attribute relationships, resolving quest_id and attribute_id using the maps for client keys
+    FOR v_qa IN
+        SELECT * FROM jsonb_to_recordset(coalesce(p_quests_attributes_inserts, '[]'::JSONB))
+        AS x(quest_id INT, quest_client_key TEXT, attribute_id INT, attribute_client_key TEXT, attribute_power INT)
+    LOOP
+        -- Check that at least one of quest_id or quest_client_key is null, and at least one of attribute_id or attribute_client_key is null
+        IF (v_qa.quest_id IS NOT NULL AND v_qa.quest_client_key IS NOT NULL) OR
+            (v_qa.attribute_id IS NOT NULL AND v_qa.attribute_client_key IS NOT NULL) THEN
+          RAISE EXCEPTION 'For quest-attribute inserts, either quest_id or quest_client_key must be null, and either attribute_id or attribute_client_key must be null';
+        END IF;
+
+        -- Resolve the quest_id and attribute_id using the maps
+        v_resolved_quest_id := COALESCE(v_qa.quest_id, (v_quest_id_map ->> v_qa.quest_client_key)::INT);
+        v_resolved_attribute_id := COALESCE(v_qa.attribute_id, (v_attribute_id_map ->> v_qa.attribute_client_key)::INT);
+
+        IF v_resolved_quest_id IS NULL THEN
+          RAISE EXCEPTION 'Unable to resolve quest ID for client key %',
+            v_qa.quest_client_key;
+        END IF;
+
+        IF v_resolved_attribute_id IS NULL THEN
+          RAISE EXCEPTION 'Unable to resolve attribute ID for client key %',
+            v_qa.attribute_client_key;
+        END IF;
+
+        -- Verify that the resolved quest and attribute belong to the user
+        PERFORM 1 FROM public.quests
+        WHERE id = v_resolved_quest_id AND user_id = p_user_id;
+        IF NOT FOUND THEN
+          RAISE EXCEPTION 'Resolved quest ID % does not belong to user %',
+            v_resolved_quest_id, p_user_id;
+        END IF;
+
+        PERFORM 1 FROM public.attributes
+        WHERE id = v_resolved_attribute_id AND user_id = p_user_id;
+        IF NOT FOUND THEN
+          RAISE EXCEPTION 'Resolved attribute ID % does not belong to user %',
+            v_resolved_attribute_id, p_user_id;
+        END IF;
+
+        INSERT INTO public.quests_attributes (
+          user_id, quest_id, attribute_id, attribute_power
+        ) VALUES (
+          p_user_id, v_resolved_quest_id, v_resolved_attribute_id, v_qa.attribute_power
+        )
+        ON CONFLICT (quest_id, attribute_id)
+        DO UPDATE SET
+            attribute_power = EXCLUDED.attribute_power,
+            updated_at = NOW();
+    END LOOP;
+
+    -- If we reach this point, all operations were successful. Commit the transaction and return a success response.
+    v_result := jsonb_build_object(
+      'status', 'success',
+      'message', 'Profile updated successfully',
+      'quest_id_map', v_quest_id_map,
+      'attribute_id_map', v_attribute_id_map
+    );
+
+    RETURN v_result;
 END;
 $$;
 ```
