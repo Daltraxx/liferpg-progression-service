@@ -191,7 +191,8 @@ export class UserProcessorService {
         });
 
         // Award quest strength progression points
-        const strengthPointGain = calculateStrengthPointGain(streak);
+        const newStreak = streak + 1;
+        const strengthPointGain = calculateStrengthPointGain(newStreak);
         const newStrengthPoints = strengthPoints + strengthPointGain;
         processedUser.progressionLogs.push(
           createQuestStrengthProgressionLog(
@@ -200,12 +201,12 @@ export class UserProcessorService {
             questName,
             strengthPointGain,
             newStrengthPoints,
-            streak,
+            newStreak,
           ),
         );
         const newStrengthLevel = calculateStrengthLevel(newStrengthPoints);
-        const newStreak = streak + 1;
         const newRestProgress = restProgress + 1;
+        
         const processedQuest = {
           questId,
           name: questName,
