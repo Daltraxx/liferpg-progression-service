@@ -440,6 +440,21 @@ export type Database = {
         };
         Returns: Json;
       };
+      edit_profile_transaction: {
+        Args: {
+          p_attributes_deletes?: Json;
+          p_attributes_inserts?: Json;
+          p_attributes_updates?: Json;
+          p_quests_attributes_deletes?: Json;
+          p_quests_attributes_inserts?: Json;
+          p_quests_attributes_updates?: Json;
+          p_quests_deletes?: Json;
+          p_quests_inserts?: Json;
+          p_quests_updates?: Json;
+          p_user_id: string;
+        };
+        Returns: Json;
+      };
       get_settlement_users_data: {
         Args: { p_timezones: string[] };
         Returns: Json;
