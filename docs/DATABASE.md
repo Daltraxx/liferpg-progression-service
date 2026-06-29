@@ -102,7 +102,7 @@ Full table can be found on the Supabase dashboard.
 - `frequency`: INT NOT NULL DEFAULT 1 CHECK (frequency >= 0)
   - Interval in days between required completions (1 = daily, 7 = weekly, etc.)
 - `rest_frequency`: INT NOT NULL DEFAULT 0 CHECK (rest_frequency >= 0)
-  - How much rest progress (consecutive completions) is required to avoid penalties for missed completions (0 = no rest, 1 = one consecutive day, 2 = two consecutivedays, etc.)
+  - How much rest progress (consecutive completions) is required to avoid penalties for missed completions (0 = no rest, 1 = one consecutive day, 2 = two consecutive days, etc.)
 - `rest_progress`: INT NOT NULL DEFAULT 0
   - Represents progress towards next rest day where not completing required quest does not result in penalties
 - `experience_share`: INT NOT NULL CHECK (experience_share BETWEEN 0 AND 100)
