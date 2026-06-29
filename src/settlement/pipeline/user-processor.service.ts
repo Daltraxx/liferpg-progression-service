@@ -121,6 +121,7 @@ export class UserProcessorService {
 
     // Process quests to determine point allocation
     userData.quests.forEach((quest) => {
+      console.log("Processing quest data:", quest);
       const {
         id: questId,
         name: questName,
@@ -135,6 +136,7 @@ export class UserProcessorService {
 
       const isCompleted = questCompletions.has(quest.id);
       if (isCompleted) {
+        console.log(`Quest ${questId} (${questName}) is completed.`);
         /**
          * If the quest is completed, need to:
          * - Award user experience for quest completion
@@ -206,7 +208,13 @@ export class UserProcessorService {
         );
         const newStrengthLevel = calculateStrengthLevel(newStrengthPoints);
         const newRestProgress = restProgress + 1;
-        
+        console.log(`Quest ${questId} (${questName}) processed:`, {
+          newStrengthLevel,
+          newStrengthPoints,
+          newStreak,
+          newRestProgress,
+          lastCompletedDate: activityDate,
+        });
         const processedQuest = {
           questId,
           name: questName,
@@ -218,6 +226,7 @@ export class UserProcessorService {
         };
         processedUser.quests.push(processedQuest);
       } else {
+        console.log(`Quest ${questId} (${questName}) is not completed.`);
         /**
          * If the quest is not completed, need to:
          * - If days since last completion exceeds frequency...
@@ -235,10 +244,12 @@ export class UserProcessorService {
           lastCompletedDate,
           activityDate,
         );
+        console.log(`Quest ${questId} (${questName}) is overdue: ${isQuestOverdue}`);
         if (isQuestOverdue) {
           let newStrengthLevel = strengthLevel;
           let newStrengthPoints = strengthPoints;
           let newStreak = streak;
+          console.log(`Quest ${questId} (${questName}) rest progress: ${restProgress}, rest frequency: ${restFrequency}`);
           if (restProgress < restFrequency) {
             // Apply penalties for missed completion
             const strengthPointLoss = calculateStrengthPointLoss(strengthLevel);
@@ -266,6 +277,7 @@ export class UserProcessorService {
             lastCompletedDate: lastCompletedDate,
           };
           processedUser.quests.push(processedQuest);
+          console.log(`Quest ${questId} (${questName}) processed:`, processedQuest);
         }
       }
     });
