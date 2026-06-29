@@ -62,7 +62,7 @@ export class SettlementService {
 
       // Step 2: Get settlement data for users in those timezones
       const settlementData: SettlementDataArray =
-        await this.userAggregatorService.getSettlementData(["America/Los_Angeles"]);
+        await this.userAggregatorService.getSettlementData(timezonesToProcess);
 
       this.logger.debug(
         `Settlement data retrieved for ${settlementData.length} users`,
@@ -84,10 +84,10 @@ export class SettlementService {
 
       // Step 4: For each user, commit update to the database in a transaction via rpc call
       // with the pre-transaction object as the payload
-      // await this.progressionCommitService.commitProgression(
-      //   processedUsers,
-      //   activityDate,
-      // );
+      await this.progressionCommitService.commitProgression(
+        processedUsers,
+        activityDate,
+      );
       this.logger.log(
         'Progression committed to database. Settlement pipeline completed successfully',
       );
